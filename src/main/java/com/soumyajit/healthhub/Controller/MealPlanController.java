@@ -2,8 +2,10 @@
 package com.soumyajit.healthhub.Controller;
 
 import com.soumyajit.healthhub.Advices.ApiResponse;
+import com.soumyajit.healthhub.DTOS.MealPlanUpdateRequest;
 import com.soumyajit.healthhub.DTOS.UserMealPlanDTO;
 import com.soumyajit.healthhub.Entities.User;
+import com.soumyajit.healthhub.Entities.UserMealPlan;
 import com.soumyajit.healthhub.Service.MealPlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -57,6 +59,21 @@ public class MealPlanController {
         ApiResponse<List<UserMealPlanDTO>> response = new ApiResponse<>(dtos);
         return ResponseEntity.ok(response);
     }
+
+    @PutMapping("/{mealPlanId}/edit")
+    public ResponseEntity<ApiResponse<String>> updateMealPlan(
+            @PathVariable Long mealPlanId,
+            @RequestBody Map<String, Map<String, List<String>>> updatedMealPlanContent) {
+
+        // Get the logged-in user
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+
+        String message = mealPlanService.updateMealPlan(mealPlanId, userId, updatedMealPlanContent);
+        return ResponseEntity.ok(new ApiResponse<>(message));
+    }
+
+
 
 
 }

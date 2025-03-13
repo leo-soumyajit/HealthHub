@@ -97,6 +97,40 @@ public class MealPlanService {
         }).collect(Collectors.toList());
     }
 
+    public String updateMealPlan(Long mealPlanId, Long userId, Map<String, Map<String, List<String>>> updatedMealPlanContent) {
+        UserMealPlan existingMealPlan = userMealPlanRepository.findById(mealPlanId)
+                .orElseThrow(() -> new RuntimeException("Meal plan not found"));
+
+        // Ensure only the owner can edit
+        if (!existingMealPlan.getUser().getId().equals(userId)) {
+            throw new RuntimeException("You are not authorized to edit this meal plan");
+        }
+
+        try {
+            // Convert existing meal plan JSON to Map
+            Map<String, Map<String, List<String>>> existingMealPlanContent =
+                    objectMapper.readValue(existingMealPlan.getMealPlanContent(), new TypeReference<>() {});
+
+            // Merge existing plan with updates (only modifying provided days)
+            for (String day : updatedMealPlanContent.keySet()) {
+                existingMealPlanContent.put(day, updatedMealPlanContent.get(day));
+            }
+
+            // Convert back to JSON and save
+            existingMealPlan.setMealPlanContent(objectMapper.writeValueAsString(existingMealPlanContent));
+            userMealPlanRepository.save(existingMealPlan);
+
+            return "Meal plan updated successfully";
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Error processing meal plan data", e);
+        }
+    }
+
+
+
+
+
+
 
     /**
      * Parses the raw AI response into a nested structure.

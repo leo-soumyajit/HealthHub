@@ -30,7 +30,7 @@ public class DailyMealPlanEmailService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Runs daily at 7 AM
-    @Scheduled(cron = "0 9 20 * * ?")
+    @Scheduled(cron = "0 22 22 * * ?")
     public void sendDailyMealPlanEmails() {
         log.info("🔄 Executing Meal Plan Email Scheduler at {}", LocalDate.now());
 
@@ -129,7 +129,9 @@ public class DailyMealPlanEmailService {
 
         builder.append("<div class='footer'>")
                 .append("Enjoy your meals! Stay healthy & happy! 😊<br>")
-                .append("<strong>HealthHub Team</strong>")
+                .append("<strong>HealthHub Team</strong> <br>")
+                .append("<br>")
+                .append("<span style='font-size:12px; color:#999;'>HealthHub | Haldia, West Bengal | Contact Support</span>")
                 .append("</div>")
                 .append("</div></body></html>");
 
