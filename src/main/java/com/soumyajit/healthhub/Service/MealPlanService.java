@@ -75,6 +75,30 @@ public class MealPlanService {
         }
     }
 
+    public void deactivateMealPlanForUser(Long userId, Long mealPlanId) {
+        // Retrieve the selected meal plan by ID.
+        Optional<UserMealPlan> mealPlanOpt = userMealPlanRepository.findById(mealPlanId);
+
+        if (mealPlanOpt.isPresent()) {
+            UserMealPlan selectedPlan = mealPlanOpt.get();
+
+            // Check if the meal plan belongs to the current user.
+            if (!selectedPlan.getUser().getId().equals(userId)) {
+                throw new RuntimeException("Unauthorized: Meal plan does not belong to the user");
+            }
+
+            // Deactivate the meal plan
+            selectedPlan.setActive(false);
+            userMealPlanRepository.save(selectedPlan);
+        } else {
+            throw new RuntimeException("Meal plan not found");
+        }
+    }
+
+
+
+
+
     public List<UserMealPlanDTO> getMealPlanDTOsForAuthenticatedUser() {
         // Retrieve the authenticated user from the security context.
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

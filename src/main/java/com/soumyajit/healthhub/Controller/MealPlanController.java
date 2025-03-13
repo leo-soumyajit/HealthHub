@@ -52,6 +52,20 @@ public class MealPlanController {
         return ResponseEntity.ok(response);
     }
 
+    @PutMapping("/{mealPlanId}/deactivate")
+    public ResponseEntity<ApiResponse<String>> deactivateMealPlan(@PathVariable Long mealPlanId) {
+        // Retrieve authenticated user
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+
+        mealPlanService.deactivateMealPlanForUser(userId, mealPlanId);
+
+        // Wrap response message
+        ApiResponse<String> response = new ApiResponse<>("Meal plan deactivated successfully");
+        return ResponseEntity.ok(response);
+    }
+
+
 
     @GetMapping("/myMealPlans")
     public ResponseEntity<ApiResponse<List<UserMealPlanDTO>>> getAllMealPlansForUser() {
