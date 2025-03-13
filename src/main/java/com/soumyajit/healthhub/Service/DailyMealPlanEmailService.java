@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
 import java.util.List;
@@ -30,13 +31,22 @@ public class DailyMealPlanEmailService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Runs daily at 7 AM
-    @Scheduled(cron = "0 22 22 * * ?")
+    @Scheduled(cron = "0 17 02 * * ?") // Runs at 02:06 AM Server Time
     public void sendDailyMealPlanEmails() {
-        log.info("🔄 Executing Meal Plan Email Scheduler at {}", LocalDate.now());
+        log.info("🔄 Executing Meal Plan Email Scheduler at {}", LocalDateTime.now());
 
         // Fetch all users
         List<User> users = userService.getAllUsers();
         log.info("📌 Total users fetched: {}", users.size());
+
+        // Use system's default timezone OR a specific one like Asia/Kolkata
+        ZoneId zone = ZoneId.systemDefault(); // Change to ZoneId.of("Asia/Kolkata") if needed
+        String today = LocalDate.now(zone)
+                .getDayOfWeek()
+                .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        log.info("🌍 Server Timezone: {}", zone);
+        log.info("📅 Today is: {}", today);
 
         for (User user : users) {
             log.info("➡️ Processing meal plan for user: {}", user.getEmail());
@@ -55,15 +65,9 @@ public class DailyMealPlanEmailService {
                         objectMapper.readValue(activePlan.getMealPlanContent(), new TypeReference<>() {});
 
                 log.info("✅ Successfully parsed meal plan for {}", user.getEmail());
-
-                // Ensure correct day mapping
-                String today = LocalDate.now(ZoneId.of("UTC"))  // Adjust timezone if needed
-                        .getDayOfWeek()
-                        .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
-
-                log.info("📅 Today is: {}", today);
                 log.info("📋 Available keys in meal plan: {}", structuredMealPlan.keySet());
 
+                // Get today's meal plan
                 Map<String, List<String>> todaysPlan = structuredMealPlan.get(today);
 
                 if (todaysPlan == null || todaysPlan.isEmpty()) {
@@ -87,6 +91,7 @@ public class DailyMealPlanEmailService {
             }
         }
     }
+
 
     /**
      * Generates a well-styled HTML email for the meal plan.
