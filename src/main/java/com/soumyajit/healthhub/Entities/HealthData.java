@@ -1,10 +1,7 @@
 // File: src/main/java/com/healthhub/entity/HealthData.java
 package com.soumyajit.healthhub.Entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
