@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +25,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFound("User not found with id: " + id));
     }
+
+    @Override
+    public List<User> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        return users;  // ✅ Now it correctly fetches users from the database
+    }
+
 
 
     @Override

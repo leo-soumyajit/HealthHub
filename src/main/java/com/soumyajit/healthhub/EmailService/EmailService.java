@@ -49,7 +49,7 @@ public class EmailService {
                     + "<p>This token is valid for only 10 minutes. If you did not request a password reset, please ignore this email or contact our support team for assistance.</p>"
                     + "<p>Thank you!</p>"
                     + "</div>"
-                    + "<div class=\"footer\"><p>Noctrune IDE | Haldia , India | Contact Support</p><p>If you didn’t request this, please ignore this email.</p></div>"
+                    + "<div class=\"footer\"><p>HealthHub | Haldia , India | Contact Support</p><p>If you didn’t request this, please ignore this email.</p></div>"
                     + "</div>"
                     + "</body>"
                     + "</html>";

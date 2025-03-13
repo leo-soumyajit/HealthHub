@@ -117,7 +117,7 @@ public class PasswordResetController {
                         + "<p>If you did not request a password reset, please contact our support team immediately.</p>"
                         + "<p>Thank you!</p>"
                         + "</div>"
-                        + "<div class=\"footer\"><p>Nocturne IDE | Haldia , India | Contact Support</p><p>If you didn’t request this, please ignore this email.</p></div>"
+                        + "<div class=\"footer\"><p>HealthHub | Haldia , India | Contact Support</p><p>If you didn’t request this, please ignore this email.</p></div>"
                         + "</div>"
                         + "</body>"
                         + "</html>";

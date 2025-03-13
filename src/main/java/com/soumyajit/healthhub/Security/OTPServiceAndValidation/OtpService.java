@@ -35,7 +35,7 @@ public class OtpService {
             MimeMessage message = emailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
-            helper.setFrom("idenocturne@gmail.com");
+            helper.setFrom("healthhubteam2025@gmail.com");
             helper.setTo(email);
             helper.setSubject("Your OTP Code");
 
@@ -58,14 +58,14 @@ public class OtpService {
                     + "</head>"
                     + "<body>"
                     + "<div class=\"email-container\">"
-                    + "<div class=\"header\"><h1>Hello, Coder!</h1></div>"
+                    + "<div class=\"header\"><h1>Hello, User!</h1></div>"
                     + "<div class=\"content\">"
-                    + "<p>Your one time password for <strong>Nocturne IDE</strong> is:</p>"
+                    + "<p>Your one time password for <strong>HealthHub</strong> is:</p>"
                     + "<div class=\"verification-code\">" + otp + "</div>"
                     + "<p>Please enter this code on the website to verify your email.</p>"
                     + "<p>Thank you!</p>"
                     + "</div>"
-                    + "<div class=\"footer\"><p>Nocturne IDE | Haldia , India | Contact Support</p><p>If you didn’t request this, please ignore this email.</p></div>"
+                    + "<div class=\"footer\"><p>HealthHub | Haldia , India | Contact Support</p><p>If you didn’t request this, please ignore this email.</p></div>"
                     + "</div>"
                     + "</body>"
                     + "</html>";

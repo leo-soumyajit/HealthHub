@@ -1,6 +1,8 @@
 // File: src/main/java/com/soumyajit/healthhub/Controller/MealPlanController.java
 package com.soumyajit.healthhub.Controller;
 
+import com.soumyajit.healthhub.Advices.ApiResponse;
+import com.soumyajit.healthhub.DTOS.UserMealPlanDTO;
 import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Service.MealPlanService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.List;
 
@@ -32,5 +35,28 @@ public class MealPlanController {
                 mealPlanService.generateStructuredMealPlan(userId, dietaryRestriction, ingredients);
         return ResponseEntity.ok(structuredMealPlan);
     }
+
+
+    @PutMapping("/{mealPlanId}/activate")
+    public ResponseEntity<ApiResponse<String>> activateMealPlan(@PathVariable Long mealPlanId) {
+        // Retrieve authenticated user
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+
+        mealPlanService.activateMealPlanForUser(userId, mealPlanId);
+
+        // Wrap your message in ApiResponse
+        ApiResponse<String> response = new ApiResponse<>("Meal plan activated successfully");
+        return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/myMealPlans")
+    public ResponseEntity<ApiResponse<List<UserMealPlanDTO>>> getAllMealPlansForUser() {
+        List<UserMealPlanDTO> dtos = mealPlanService.getMealPlanDTOsForAuthenticatedUser();
+        ApiResponse<List<UserMealPlanDTO>> response = new ApiResponse<>(dtos);
+        return ResponseEntity.ok(response);
+    }
+
 
 }

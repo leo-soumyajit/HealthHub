@@ -42,7 +42,7 @@ public class HealthService {
             // Example threshold: if heart rate is above 120 bpm, send an email alert.
             if (data.getHeartRate() != null && data.getHeartRate() > 120) {
                 try {
-                    mailService.sendAlertEmail(
+                    mailService.sendAlertEmail("",
                             "Health Alert for User " + data.getUserId(),
                             "Your heart rate of " + data.getHeartRate() + " bpm is above the safe threshold."
                     );
