@@ -90,6 +90,21 @@ public class MealPlanController {
     }
 
 
+    @DeleteMapping("/{mealPlanId}")
+    public ResponseEntity<ApiResponse<String>> deleteMealPlan(@PathVariable Long mealPlanId) {
+        // Retrieve the authenticated user from the security context
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+
+        // Call the service to delete the meal plan
+        mealPlanService.deleteMealPlanForUser(mealPlanId, userId);
+
+        // Wrap the success message in ApiResponse and return
+        ApiResponse<String> response = new ApiResponse<>("Meal plan deleted successfully");
+        return ResponseEntity.ok(response);
+    }
+
+
 
 
 }
