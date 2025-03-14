@@ -29,9 +29,10 @@ public class MealPlanService {
      * and saves the meal plan as a JSON string for the given user.
      * The meal plan is saved with the active flag set to false.
      */
-    public Map<String, Map<String, List<String>>> generateStructuredMealPlan(Long userId, String dietaryRestriction, String ingredients) {
-        // Get the AI response based on the dietary restrictions and available ingredients.
-        String aiResponse = aiIntegrationService.getMealPlanSuggestion(dietaryRestriction, ingredients);
+    public Map<String, Map<String, List<String>>> generateStructuredMealPlan(Long userId,
+                                                                             String dietaryRestriction, String ingredients, String healthGoal) {
+        // Get the AI response based on dietary restrictions, ingredients, and the health goal.
+        String aiResponse = aiIntegrationService.getMealPlanSuggestion(dietaryRestriction, ingredients, healthGoal);
         Map<String, Map<String, List<String>>> structuredMealPlan = parseMealPlan(aiResponse);
 
         try {
@@ -48,6 +49,7 @@ public class MealPlanService {
         }
         return structuredMealPlan;
     }
+
 
     /**
      * Activates a saved meal plan for the user.
@@ -153,60 +155,99 @@ public class MealPlanService {
 
 
 
-
-
-
     /**
      * Parses the raw AI response into a nested structure.
      * Expected format: Day headers (e.g., "**Monday**") and meal type headers (e.g., "* Breakfast: ..."),
      * with additional detail lines starting with "+".
      */
     private Map<String, Map<String, List<String>>> parseMealPlan(String aiResponse) {
-        Map<String, Map<String, List<String>>> mealPlan = new LinkedHashMap<>();
+        // Initialize the meal plan map with expected days.
         List<String> expectedDays = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
-        // Initialize the map with the expected days.
+        Map<String, Map<String, List<String>>> mealPlan = new LinkedHashMap<>();
         for (String day : expectedDays) {
             mealPlan.put(day, new LinkedHashMap<>());
         }
+
         String[] lines = aiResponse.split("\\n");
         String currentDay = null;
         String currentMealType = null;
+
         for (String line : lines) {
             line = line.trim();
             if (line.isEmpty()) continue;
-            // Check for day header (e.g., "**Monday**")
-            if (line.startsWith("**") && line.endsWith("**")) {
-                String dayHeader = line.replace("**", "").trim();
-                if (expectedDays.contains(dayHeader)) {
-                    currentDay = dayHeader;
-                } else {
-                    currentDay = "Unspecified Day";
-                }
+
+            // Remove asterisks for easier matching
+            String cleanLine = line.replace("*", "").trim();
+
+            // Check if the line is a day header (e.g., "**Monday**")
+            if (expectedDays.contains(cleanLine)) {
+                currentDay = cleanLine;
+                continue;
             }
-            // Check for meal type header (e.g., "* Breakfast: ...")
-            else if (line.startsWith("*")) {
+
+            // Check for meal type headers (lines starting with "*")
+            if (line.startsWith("*")) {
+                // Remove the leading "*" and then split by ":" for potential inline detail.
                 String mealLine = line.substring(1).trim();
                 String[] parts = mealLine.split(":", 2);
-                currentMealType = parts[0].trim();
+                currentMealType = parts[0].replace("*", "").trim(); // clean meal type key
+
+                // Default to first expected day if currentDay is null
                 if (currentDay == null || !mealPlan.containsKey(currentDay)) {
                     currentDay = expectedDays.get(0);
                 }
                 mealPlan.get(currentDay).putIfAbsent(currentMealType, new ArrayList<>());
+
+                // If inline detail exists after the colon, add it.
                 if (parts.length > 1) {
                     String detail = parts[1].trim();
                     if (!detail.isEmpty()) {
                         mealPlan.get(currentDay).get(currentMealType).add(detail);
                     }
                 }
+                continue;
             }
-            // Check for additional detail lines (e.g., "+ ...")
-            else if (line.startsWith("+")) {
+
+            // Check for additional detail lines starting with "+"
+            if (line.startsWith("+")) {
                 String detail = line.substring(1).trim();
                 if (currentDay != null && currentMealType != null) {
                     mealPlan.get(currentDay).get(currentMealType).add(detail);
                 }
+                continue;
+            }
+
+            // If line does not start with any special character, assume it's an additional detail
+            if (currentDay != null && currentMealType != null) {
+                mealPlan.get(currentDay).get(currentMealType).add(line);
             }
         }
+
+        // Reorder each day's meal types so that "Snack" appears before "Dinner"
+        for (String day : mealPlan.keySet()) {
+            Map<String, List<String>> original = mealPlan.get(day);
+            // Define desired order. (You can adjust as needed.)
+            List<String> desiredOrder = Arrays.asList("Breakfast", "Snack", "Lunch", "Dinner");
+            LinkedHashMap<String, List<String>> ordered = new LinkedHashMap<>();
+
+            // First, add keys in desired order if they exist.
+            for (String key : desiredOrder) {
+                if (original.containsKey(key)) {
+                    ordered.put(key, original.get(key));
+                }
+            }
+            // Append any remaining keys.
+            for (String key : original.keySet()) {
+                if (!ordered.containsKey(key)) {
+                    ordered.put(key, original.get(key));
+                }
+            }
+            mealPlan.put(day, ordered);
+        }
+
         return mealPlan;
     }
+
+
+
 }

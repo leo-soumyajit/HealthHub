@@ -26,17 +26,19 @@ public class MealPlanController {
     @GetMapping
     public ResponseEntity<Map<String, Map<String, List<String>>>> getMealPlan(
             @RequestParam(required = false) String dietaryRestriction,
-            @RequestParam(required = false) String ingredients) {
+            @RequestParam(required = false) String ingredients,
+            @RequestParam(required = true) String healthGoal) {
 
         // Retrieve the authenticated user's details from the security context.
-        User userDetails = (User) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
 
+        // Pass the extra healthGoal parameter to the service
         Map<String, Map<String, List<String>>> structuredMealPlan =
-                mealPlanService.generateStructuredMealPlan(userId, dietaryRestriction, ingredients);
+                mealPlanService.generateStructuredMealPlan(userId, dietaryRestriction, ingredients, healthGoal);
         return ResponseEntity.ok(structuredMealPlan);
     }
+
 
 
     @PutMapping("/{mealPlanId}/activate")
