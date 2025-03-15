@@ -1,170 +1,162 @@
 let stompClient = null;
 
-// Aggressively clean JSON string: trim whitespace, remove BOM, remove trailing commas, and collapse whitespace.
+/**
+ * Cleans up JSON string by trimming, removing BOM characters, and fixing formatting.
+ */
 function cleanJsonString(jsonStr) {
-  let cleaned = jsonStr.trim().replace(/^\uFEFF/, "");
-  // Remove trailing commas before } or ]
-  let prev;
-  do {
-    prev = cleaned;
-    cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
-  } while (cleaned !== prev);
-  // Replace newline characters with a space and collapse multiple spaces
-  cleaned = cleaned.replace(/\n/g, " ").replace(/\s+/g, " ");
-  return cleaned;
+    let cleaned = jsonStr.trim().replace(/^\uFEFF/, ""); // Remove BOM
+    let prev;
+    do {
+        prev = cleaned;
+        cleaned = cleaned.replace(/,\s*([\]}])/g, "$1"); // Remove trailing commas
+    } while (cleaned !== prev);
+    return cleaned.replace(/\n/g, " ").replace(/\s+/g, " "); // Collapse spaces
 }
 
 /**
- * Attempt to parse a JSON string.
- * If parsing fails, try cleaning and extracting substring from first "{" to last "}".
+ * Safely parses JSON content while fixing double-encoded JSON if needed.
  */
 function safeParseJSON(content) {
-  try {
-    return JSON.parse(content);
-  } catch (e) {
-    console.error("Initial JSON parse error:", e.message);
-    const cleaned = cleanJsonString(content);
     try {
-      return JSON.parse(cleaned);
-    } catch (e2) {
-      console.error("Error after cleaning:", e2.message);
-      const start = cleaned.indexOf("{");
-      const end = cleaned.lastIndexOf("}");
-      if (start !== -1 && end !== -1 && end > start) {
-        const trimmedContent = cleaned.substring(start, end + 1);
+        return JSON.parse(content); // Try parsing normally
+    } catch (e) {
+        console.warn("Initial JSON parse error:", e.message);
+        const cleaned = cleanJsonString(content);
         try {
-          return JSON.parse(trimmedContent);
-        } catch (e3) {
-          console.error("Error parsing substring JSON:", e3.message);
-          console.error("Substring content:", trimmedContent);
-          throw e3;
+            return JSON.parse(cleaned);
+        } catch (e2) {
+            console.warn("Error after cleaning:", e2.message);
+            try {
+                return JSON.parse(JSON.parse(content)); // Fix double-encoded JSON
+            } catch (e3) {
+                console.warn("Double-encoded JSON fix failed:", e3.message);
+                return content; // Return raw text if still invalid
+            }
         }
-      } else {
-        throw e2;
-      }
     }
-  }
 }
 
+/**
+ * Connects to WebSocket backend and subscribes to AI messages.
+ */
 function connect() {
-  // Connect to your WebSocket endpoint (adjust port if needed)
-  const socket = new SockJS("http://localhost:7000/ws-chat");
-  stompClient = Stomp.over(socket);
+    const socket = new SockJS("http://localhost:7000/ws-chat");
+    stompClient = Stomp.over(socket);
 
-  stompClient.connect({}, function(frame) {
-    console.log("Connected: " + frame);
-    stompClient.subscribe("/topic/public", function(messageOutput) {
-      removeLoading();
-      try {
-        const msg = JSON.parse(messageOutput.body);
-        displayMessage(msg);
-      } catch (e) {
-        console.error("Error parsing message from server:", e);
-      }
+    stompClient.connect({}, function(frame) {
+        console.log("Connected: " + frame);
+        stompClient.subscribe("/topic/public", function(messageOutput) {
+            removeLoading();
+            try {
+                const msg = JSON.parse(messageOutput.body);
+                displayMessage(msg);
+            } catch (e) {
+                console.error("Error parsing message from server:", e);
+            }
+        });
+    }, function(error) {
+        console.error("STOMP error: " + error);
     });
-  }, function(error) {
-    console.error("STOMP error: " + error);
-  });
 }
 
+/**
+ * Displays AI and user messages in the chat box.
+ */
 function displayMessage(message) {
-  const chatBox = document.getElementById("chat-box");
-  const msgElem = document.createElement("div");
-  msgElem.classList.add("message");
+    const chatBox = document.getElementById("chat-box");
+    const msgElem = document.createElement("div");
+    msgElem.classList.add("message");
 
-  if (message.sender === "AI") {
-    msgElem.classList.add("ai");
-    let content = message.content;
+    if (message.sender === "AI") {
+        msgElem.classList.add("ai");
+        let content = message.content.trim();
 
-    // Remove wrapping backticks if present (common with markdown responses)
-    if (content.startsWith("```") && content.endsWith("```")) {
-      content = content.substring(3, content.length - 3).trim();
-    }
-    content = content.trim();
+        // Try to parse AI content as JSON
+        content = safeParseJSON(content);
 
-    // Only attempt JSON parsing if the content starts with "{"
-    if (content.startsWith("{")) {
-      try {
-        const responseJson = safeParseJSON(content);
-        let formattedHTML = `<h3>${responseJson.title}</h3>`;
-        if (Array.isArray(responseJson.steps)) {
-          formattedHTML += "<ol>";
-          responseJson.steps.forEach(step => {
-            formattedHTML += `<li><strong>Step ${step.step}:</strong> ${step.instruction}<br><em>${step.note}</em></li>`;
-          });
-          formattedHTML += "</ol>";
+        // If content is structured AI JSON, format it nicely
+        if (typeof content === "object" && content.title && Array.isArray(content.steps)) {
+            let formattedHTML = `<h3>🩺 ${content.title}</h3><ol>`;
+            content.steps.forEach(step => {
+                formattedHTML += `<li><strong>Step ${step.step}:</strong> ${step.instruction}<br><em>${step.note}</em></li>`;
+            });
+            formattedHTML += "</ol>";
+
+            if (content.note) {
+                formattedHTML += `<p>⚠️ <em>${content.note}</em></p>`;
+            }
+
+            msgElem.innerHTML = "AI: " + formattedHTML;
+        } else {
+            // If AI response is plain text, just display it
+            msgElem.textContent = "AI: " + content;
         }
-        if (responseJson.note) {
-          formattedHTML += `<p><em>${responseJson.note}</em></p>`;
-        }
-        msgElem.innerHTML = "AI: " + formattedHTML;
-      } catch (e) {
-        console.error("Error parsing AI JSON:", e);
-        console.error("Raw AI content after cleaning:", content);
-        // Fallback: display raw content if parsing fails
-        msgElem.textContent = "AI (raw): " + content;
-      }
     } else {
-      // If content doesn't look like JSON, display it as plain text.
-      msgElem.textContent = "AI: " + content;
+        msgElem.classList.add("user");
+        msgElem.textContent = "User: " + message.content;
     }
-  } else {
-    msgElem.classList.add("user");
-    msgElem.textContent = "User: " + message.content;
-  }
 
-  chatBox.appendChild(msgElem);
-  chatBox.scrollTop = chatBox.scrollHeight;
-}
-
-function showLoading() {
-  const chatBox = document.getElementById("chat-box");
-  if (!document.getElementById("loadingMsg")) {
-    const loadingElem = document.createElement("div");
-    loadingElem.id = "loadingMsg";
-    loadingElem.classList.add("message", "loading");
-    loadingElem.textContent = "AI is generating a response...";
-    chatBox.appendChild(loadingElem);
+    chatBox.appendChild(msgElem);
     chatBox.scrollTop = chatBox.scrollHeight;
-  }
 }
 
+/**
+ * Shows a loading message while AI is processing.
+ */
+function showLoading() {
+    const chatBox = document.getElementById("chat-box");
+    if (!document.getElementById("loadingMsg")) {
+        const loadingElem = document.createElement("div");
+        loadingElem.id = "loadingMsg";
+        loadingElem.classList.add("message", "loading");
+        loadingElem.textContent = "AI is generating a response...";
+        chatBox.appendChild(loadingElem);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+}
+
+/**
+ * Removes the loading message after AI responds.
+ */
 function removeLoading() {
-  const loadingElem = document.getElementById("loadingMsg");
-  if (loadingElem) {
-    loadingElem.remove();
-  }
+    const loadingElem = document.getElementById("loadingMsg");
+    if (loadingElem) {
+        loadingElem.remove();
+    }
 }
 
+/**
+ * Sends a user message to the backend via WebSocket.
+ */
 function sendMessage() {
-  const input = document.getElementById("chatInput");
-  const text = input.value.trim();
-  if (!text || !stompClient) return;
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if (!text || !stompClient) return;
 
-  // Create a user message object
-  const userMessage = {
-    sender: "User",
-    content: text,
-    type: "CHAT"
-  };
+    const userMessage = {
+        sender: "User",
+        content: text,
+        type: "CHAT"
+    };
 
-  // Display user's message immediately
-  displayMessage(userMessage);
-  showLoading();
+    displayMessage(userMessage);
+    showLoading();
 
-  // Send the message to the backend via STOMP
-  stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(userMessage));
-  input.value = "";
+    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(userMessage));
+    input.value = "";
 }
 
+/**
+ * Handles "Enter" key press to send messages.
+ */
 function handleKeyPress(event) {
-  if (event.key === "Enter") {
-    sendMessage();
-  }
+    if (event.key === "Enter") {
+        sendMessage();
+    }
 }
 
+// Start WebSocket connection when the page loads
 window.onload = function() {
-  connect();
-  // Add event listener to input for Enter key press
-  document.getElementById("chatInput").addEventListener("keypress", handleKeyPress);
+    connect();
+    document.getElementById("chatInput").addEventListener("keypress", handleKeyPress);
 };

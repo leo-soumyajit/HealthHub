@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class AIChatService {
@@ -20,40 +22,31 @@ public class AIChatService {
     private final WebClient webClient;
 
     public AIChatService(WebClient.Builder webClientBuilder) {
-        // Build a web client without a base URL here, so we can append the endpoint path.
         this.webClient = webClientBuilder.build();
     }
 
     public ChatMessage getAIResponse(ChatMessage incomingMessage) {
-        String userContent = incomingMessage.getContent().toLowerCase().trim();
+        String userContent = incomingMessage.getContent().trim();
 
         // Check for a simple greeting
-        if (userContent.equals("hi") || userContent.equals("hello")) {
-            return new ChatMessage("AI", "Hello! How can I help you today?", ChatMessage.MessageType.AI_RESPONSE);
+        if (userContent.equalsIgnoreCase("hi") || userContent.equalsIgnoreCase("hello")) {
+            return new ChatMessage("AI", "{\"title\": \"Greeting\", \"steps\": [{\"step\": 1, \"instruction\": \"Hello! How can I assist you today?\", \"note\": \"Ask me anything health-related.\"}], \"note\": \"I'm here to help!\"}", ChatMessage.MessageType.AI_RESPONSE);
         }
 
-        // Otherwise, construct a detailed prompt for a structured JSON response
-        String prompt = "You are HealthGuru, a smart AI health advisor. " +
-                "When a user asks for help, provide a detailed, step-by-step solution in the following JSON format:\n\n" +
+        // Construct structured JSON prompt
+        String prompt = "You are HealthGuru, an AI health advisor. " +
+                "Provide a clear, step-by-step solution in JSON format only. " +
+                "Strictly follow this format:\n\n" +
                 "{\n" +
                 "  \"title\": \"<Solution Title>\",\n" +
                 "  \"steps\": [\n" +
-                "    {\n" +
-                "      \"step\": 1,\n" +
-                "      \"instruction\": \"<Instruction 1>\",\n" +
-                "      \"note\": \"<Additional note if any>\"\n" +
-                "    },\n" +
-                "    {\n" +
-                "      \"step\": 2,\n" +
-                "      \"instruction\": \"<Instruction 2>\",\n" +
-                "      \"note\": \"<Additional note if any>\"\n" +
-                "    }\n" +
-                "    // ... additional steps as needed\n" +
+                "    { \"step\": 1, \"instruction\": \"<Instruction 1>\", \"note\": \"<Additional note if any>\" },\n" +
+                "    { \"step\": 2, \"instruction\": \"<Instruction 2>\", \"note\": \"<Additional note if any>\" }\n" +
                 "  ],\n" +
                 "  \"note\": \"<Overall note or disclaimer>\"\n" +
                 "}\n\n" +
-                "Provide only the JSON response. \n" +
-                "User: " + incomingMessage.getContent();
+                "Ensure the output is valid JSON without extra text. \n" +
+                "User Query: " + userContent;
 
         try {
             Map<String, Object> payload = Map.of(
@@ -71,15 +64,21 @@ public class AIChatService {
                     .bodyToMono(Map.class)
                     .block();
 
-            String aiReply = result != null && result.get("response") != null
-                    ? result.get("response").toString()
-                    : "I'm sorry, I cannot provide a solution at this time.";
+            String aiReply = (result != null && result.get("response") != null)
+                    ? cleanJsonResponse(result.get("response").toString())
+                    : "{\"title\": \"Error\", \"steps\": [{\"step\": 1, \"instruction\": \"AI could not generate a response.\", \"note\": \"Please try again later.\"}], \"note\": \"Apologies for the inconvenience.\"}";
 
             return new ChatMessage("AI", aiReply, ChatMessage.MessageType.AI_RESPONSE);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ChatMessage("AI", "There was an error processing your request.", ChatMessage.MessageType.AI_RESPONSE);
+            return new ChatMessage("AI", "{\"title\": \"Error\", \"steps\": [{\"step\": 1, \"instruction\": \"An error occurred while processing your request.\", \"note\": \"Try again later.\"}], \"note\": \"Apologies for the inconvenience.\"}", ChatMessage.MessageType.AI_RESPONSE);
         }
     }
 
+    // Ensure JSON is properly extracted
+    private String cleanJsonResponse(String response) {
+        Pattern pattern = Pattern.compile("\\{.*\\}", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(response);
+        return matcher.find() ? matcher.group(0) : "{\"title\": \"Invalid Response\", \"steps\": [{\"step\": 1, \"instruction\": \"AI response was not in JSON format.\", \"note\": \"Please check with the developers.\"}], \"note\": \"Technical error.\"}";
+    }
 }
