@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>HealthGuru Chat</title>
+    <link rel="stylesheet" href="chat.css" />
+    <!-- Include SockJS and Stomp.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.0/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+<div class="chat-container">
+    <header>
+        <h1>HealthGuru</h1>
+        <p>The Smart Path to Wellness</p>
+    </header>
+    <div id="chat-box" class="chat-box"></div>
+    <div class="input-area">
+        <input type="text" id="chatInput" placeholder="Type your message here..." />
+        <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+    <footer>
+        <p>HealthGuru | Haldia, West Bengal | Contact Support</p>
+    </footer>
+</div>
+<script src="chat.js"></script>
+</body>
+</html>
