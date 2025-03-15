@@ -86,10 +86,10 @@ function displayMessage(message) {
                 formattedHTML += `<p>⚠️ <em>${content.note}</em></p>`;
             }
 
-            msgElem.innerHTML = "AI: " + formattedHTML;
+            msgElem.innerHTML = formattedHTML;
         } else {
-            // If AI response is plain text, just display it
-            msgElem.textContent = "AI: " + content;
+            // Ensure JSON is stringified properly
+            msgElem.innerHTML = `<pre>${JSON.stringify(content, null, 2)}</pre>`;
         }
     } else {
         msgElem.classList.add("user");

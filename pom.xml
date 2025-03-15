@@ -73,6 +73,20 @@
 			<artifactId>spring-boot-starter-websocket</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>com.cybozu.labs</groupId>
+			<artifactId>langdetect</artifactId>
+			<version>1.1-20120112</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.tika</groupId>
+			<artifactId>tika-core</artifactId>
+			<version>2.9.1</version>
+		</dependency>
+
+
+
 
 
 		<dependency>
