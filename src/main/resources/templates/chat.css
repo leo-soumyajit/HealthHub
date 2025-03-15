@@ -91,15 +91,30 @@ header {
   align-self: flex-start;
 }
 
-/* For structured JSON output styling */
-.message pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: monospace;
-  background: #f1f1f1;
-  padding: 8px;
-  border-radius: 8px;
+/* Structured output styling */
+.message.ai h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.message.ai ol {
+  margin-left: 20px;
+  padding-left: 0;
+}
+
+.message.ai li {
+  margin-bottom: 10px;
+}
+
+.message.ai li strong {
+  color: #007bff;
+}
+
+.message.ai li em {
+  display: block;
   margin-top: 4px;
+  color: #555;
 }
 
 /* Input area */

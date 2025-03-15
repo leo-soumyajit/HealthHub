@@ -1,7 +1,36 @@
 let stompClient = null;
 
+// Aggressively clean JSON string: trim whitespace, remove BOM, remove trailing commas, and collapse whitespace.
+function cleanJsonString(jsonStr) {
+  let cleaned = jsonStr.trim().replace(/^\uFEFF/, "");
+  // Remove trailing commas before } or ]
+  cleaned = cleaned.replace(/,\s*([\]}])/g, "$1");
+  // Replace newline characters with a space and collapse multiple spaces
+  cleaned = cleaned.replace(/\n/g, " ").replace(/\s+/g, " ");
+  return cleaned;
+}
+
+// Try to parse JSON string; if it fails, try cleaning it first.
+function safeParseJSON(content) {
+  try {
+    return JSON.parse(content);
+  } catch (e) {
+    console.error("Initial JSON parse error:", e.message);
+    try {
+      const cleaned = cleanJsonString(content);
+      console.log("Cleaned JSON:", cleaned);
+      return JSON.parse(cleaned);
+    } catch (e2) {
+      console.error("Final JSON parse error:", e2.message);
+      console.error("Completely failed JSON:", cleanJsonString(content));
+      throw e2;
+    }
+  }
+}
+
 function connect() {
-  const socket = new SockJS("http://localhost:7000/ws-chat"); // adjust port if needed
+  // Connect to your WebSocket endpoint (adjust port if needed)
+  const socket = new SockJS("http://localhost:7000/ws-chat");
   stompClient = Stomp.over(socket);
 
   stompClient.connect({}, function(frame) {
@@ -9,8 +38,7 @@ function connect() {
     stompClient.subscribe("/topic/public", function(messageOutput) {
       removeLoading();
       try {
-        // Parse the incoming message (it should be a JSON string)
-        let msg = JSON.parse(messageOutput.body);
+        const msg = JSON.parse(messageOutput.body);
         displayMessage(msg);
       } catch (e) {
         console.error("Error parsing message from server:", e);
@@ -28,17 +56,23 @@ function displayMessage(message) {
 
   if (message.sender === "AI") {
     msgElem.classList.add("ai");
-
-    // Remove wrapping backticks if present (e.g., ```...```)
     let content = message.content;
+
+    // Remove wrapping backticks if present (common with markdown)
     if (content.startsWith("```") && content.endsWith("```")) {
       content = content.substring(3, content.length - 3).trim();
     }
 
+    content = content.trim();
+
+    // Check if content ends with "}", if not, append one.
+    if (!content.endsWith("}")) {
+      console.log("Content doesn't end with '}', appending one.");
+      content += "}";
+    }
+
     try {
-      // Attempt to parse the content as JSON
-      const responseJson = JSON.parse(content);
-      // Build formatted HTML
+      const responseJson = safeParseJSON(content);
       let formattedHTML = `<h3>${responseJson.title}</h3>`;
       if (Array.isArray(responseJson.steps)) {
         formattedHTML += "<ol>";
@@ -53,8 +87,9 @@ function displayMessage(message) {
       msgElem.innerHTML = "AI: " + formattedHTML;
     } catch (e) {
       console.error("Error parsing AI JSON:", e);
-      // Fallback to displaying the raw text if parsing fails
-      msgElem.textContent = "AI: " + message.content;
+      console.error("Raw AI content after cleaning:", content);
+      // Fallback: display raw content if parsing fails
+      msgElem.textContent = "AI (raw): " + content;
     }
   } else {
     msgElem.classList.add("user");
@@ -98,10 +133,9 @@ function sendMessage() {
 
   // Display user's message immediately
   displayMessage(userMessage);
-  // Show loading indicator while waiting for AI response
   showLoading();
 
-  // Send message to backend via STOMP
+  // Send the message to the backend via STOMP
   stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(userMessage));
   input.value = "";
 }
