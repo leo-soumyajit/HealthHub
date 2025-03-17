@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Map;   
 
 @Slf4j
 @Service
@@ -55,7 +55,4 @@ public class AIIntegrationService {
 
         return response;
     }
-
-
-
 }

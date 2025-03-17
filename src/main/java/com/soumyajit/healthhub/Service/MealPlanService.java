@@ -187,18 +187,20 @@ public class MealPlanService {
      * with additional detail lines starting with "+".
      */
     public Map<String, Map<String, List<String>>> parseMealPlan(String aiResponse) {
-        // Attempt to parse as composite JSON first (i.e. {"healthGoal": "...", "mealPlan": { ... }})
+        // First, try to parse as composite JSON (i.e. {"healthGoal": "...", "mealPlan": { ... }})
         try {
             Map<String, Object> composite = objectMapper.readValue(aiResponse, new TypeReference<Map<String, Object>>() {});
             if (composite.containsKey("mealPlan")) {
-                return objectMapper.convertValue(composite.get("mealPlan"),
-                        new TypeReference<Map<String, Map<String, List<String>>>>() {});
+                return objectMapper.convertValue(
+                        composite.get("mealPlan"),
+                        new TypeReference<Map<String, Map<String, List<String>>>>() {}
+                );
             }
         } catch (Exception ex) {
-            // Not a composite JSON or parsing failed, so fall back to line-based parsing.
+            // Composite parsing failed; proceed to line-based parsing.
         }
 
-        // Default: use line-based parsing
+        // Define expected days and meal types.
         List<String> expectedDays = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         Set<String> expectedMealTypes = new HashSet<>(Arrays.asList("Breakfast", "Snack", "Lunch", "Dinner"));
 
@@ -230,7 +232,12 @@ public class MealPlanService {
                 String mealLine = line.substring(1).trim();
                 String[] parts = mealLine.split(":", 2);
                 currentMealType = parts[0].replace("*", "").trim();
-                // Default to first expected day if currentDay is not set.
+                // Only process if the meal type is expected.
+                if (!expectedMealTypes.contains(currentMealType)) {
+                    currentMealType = null;
+                    continue;
+                }
+                // Default to the first expected day if currentDay is not set.
                 if (currentDay == null || !mealPlan.containsKey(currentDay)) {
                     currentDay = expectedDays.get(0);
                 }
@@ -253,65 +260,22 @@ public class MealPlanService {
                 continue;
             }
 
-            // Otherwise, treat the line as an additional detail.
+            // Otherwise, treat the line as an additional detail if we have a valid meal type.
             if (currentDay != null && currentMealType != null) {
                 mealPlan.get(currentDay).get(currentMealType).add(line);
             }
         }
 
-        // Post-process: merge any keys not in expectedMealTypes into a "Tips" key.
-        for (String day : mealPlan.keySet()) {
+        // For each day, remove any keys not in the expectedMealTypes (i.e. exclude extra keys like "Tips")
+        for (String day : expectedDays) {
             Map<String, List<String>> dayMeals = mealPlan.get(day);
-            List<String> tips = new ArrayList<>();
-            // If there is already a "Tips" key, move its content into tips.
-            if (dayMeals.containsKey("Tips")) {
-                for (String tip : dayMeals.get("Tips")) {
-                    if (!tip.trim().equals("**") && !tip.trim().isEmpty()) {
-                        tips.add(tip);
-                    }
-                }
-                dayMeals.remove("Tips");
-            }
-            // For any key that is not an expected meal type, add the key and its details as tips.
-            for (String key : new ArrayList<>(dayMeals.keySet())) {
-                if (!expectedMealTypes.contains(key)) {
-                    if (!key.trim().isEmpty()) {
-                        tips.add(key);
-                    }
-                    List<String> details = dayMeals.get(key);
-                    if (details != null) {
-                        for (String detail : details) {
-                            if (!detail.trim().isEmpty()) {
-                                tips.add(detail);
-                            }
-                        }
-                    }
-                    dayMeals.remove(key);
-                }
-            }
-            // Reorder keys so that expected meal types appear first.
-            LinkedHashMap<String, List<String>> orderedDayMeals = new LinkedHashMap<>();
-            List<String> desiredOrder = Arrays.asList("Breakfast", "Snack", "Lunch", "Dinner");
-            for (String type : desiredOrder) {
-                if (dayMeals.containsKey(type)) {
-                    orderedDayMeals.put(type, dayMeals.get(type));
-                }
-            }
-            // Add any remaining keys (if any)
-            for (String key : dayMeals.keySet()) {
-                if (!orderedDayMeals.containsKey(key)) {
-                    orderedDayMeals.put(key, dayMeals.get(key));
-                }
-            }
-            // Finally, add the "Tips" key if tips exist.
-            if (!tips.isEmpty()) {
-                orderedDayMeals.put("Tips", tips);
-            }
-            mealPlan.put(day, orderedDayMeals);
+            dayMeals.keySet().removeIf(key -> !expectedMealTypes.contains(key));
         }
 
         return mealPlan;
     }
+
+
 
 
 
