@@ -2,6 +2,7 @@
 package com.soumyajit.healthhub.Controller;
 
 import com.soumyajit.healthhub.Advices.ApiResponse;
+import com.soumyajit.healthhub.DTOS.MealPlanResponse;
 import com.soumyajit.healthhub.DTOS.MealPlanUpdateRequest;
 import com.soumyajit.healthhub.DTOS.UserMealPlanDTO;
 import com.soumyajit.healthhub.Entities.User;
@@ -13,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
 
@@ -24,19 +26,25 @@ public class MealPlanController {
     private final MealPlanService mealPlanService;
 
     @GetMapping
-    public ResponseEntity<Map<String, Map<String, List<String>>>> getMealPlan(
+    public ResponseEntity<ApiResponse<MealPlanResponse>> getMealPlan(
             @RequestParam(required = false) String dietaryRestriction,
             @RequestParam(required = false) String ingredients,
             @RequestParam(required = true) String healthGoal) {
 
-        // Retrieve the authenticated user's details from the security context.
+        // Retrieve authenticated user's details
         User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Long userId = userDetails.getId();
 
-        // Pass the extra healthGoal parameter to the service
+        // Generate structured meal plan (healthGoal is used in the AI prompt only)
         Map<String, Map<String, List<String>>> structuredMealPlan =
                 mealPlanService.generateStructuredMealPlan(userId, dietaryRestriction, ingredients, healthGoal);
-        return ResponseEntity.ok(structuredMealPlan);
+
+        // Prepare response DTO with both the meal plan and the health goal heading.
+        MealPlanResponse responseData = new MealPlanResponse();
+        responseData.setHealthGoal(healthGoal);
+        responseData.setMealPlan(structuredMealPlan);
+
+        return ResponseEntity.ok(new ApiResponse<>(responseData));
     }
 
 
@@ -72,9 +80,9 @@ public class MealPlanController {
     @GetMapping("/myMealPlans")
     public ResponseEntity<ApiResponse<List<UserMealPlanDTO>>> getAllMealPlansForUser() {
         List<UserMealPlanDTO> dtos = mealPlanService.getMealPlanDTOsForAuthenticatedUser();
-        ApiResponse<List<UserMealPlanDTO>> response = new ApiResponse<>(dtos);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(new ApiResponse<>(dtos));
     }
+
 
     @PutMapping("/{mealPlanId}/edit")
     public ResponseEntity<ApiResponse<String>> updateMealPlan(

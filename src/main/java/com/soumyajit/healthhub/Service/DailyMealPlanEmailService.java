@@ -31,7 +31,7 @@ public class DailyMealPlanEmailService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Runs daily at 7 AM
-    @Scheduled(cron = "0 14 01 * * ?") // Runs at 02:06 AM Server Time
+    @Scheduled(cron = "0 48 13 * * ?") // Runs at 02:06 AM Server Time
     public void sendDailyMealPlanEmails() {
         log.info("🔄 Executing Meal Plan Email Scheduler at {}", LocalDateTime.now());
 
@@ -39,8 +39,8 @@ public class DailyMealPlanEmailService {
         List<User> users = userService.getAllUsers();
         log.info("📌 Total users fetched: {}", users.size());
 
-        // Use system's default timezone OR a specific one like Asia/Kolkata
-        ZoneId zone = ZoneId.systemDefault(); // Change to ZoneId.of("Asia/Kolkata") if needed
+        // Use system's default timezone OR a specific one (e.g., Asia/Kolkata)
+        ZoneId zone = ZoneId.systemDefault(); // or ZoneId.of("Asia/Kolkata")
         String today = LocalDate.now(zone)
                 .getDayOfWeek()
                 .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
@@ -60,25 +60,29 @@ public class DailyMealPlanEmailService {
             UserMealPlan activePlan = activePlanOpt.get();
 
             try {
-                // Parse meal plan JSON
-                Map<String, Map<String, List<String>>> structuredMealPlan =
-                        objectMapper.readValue(activePlan.getMealPlanContent(), new TypeReference<>() {});
+                // Parse the composite JSON stored in the mealPlanContent field.
+                Map<String, Object> composite = objectMapper.readValue(
+                        activePlan.getMealPlanContent(), new TypeReference<Map<String, Object>>() {}
+                );
+
+                // Extract the meal plan part (ignore the healthGoal) and convert it to the expected type.
+                Map<String, Map<String, List<String>>> structuredMealPlan = objectMapper.convertValue(
+                        composite.get("mealPlan"), new TypeReference<Map<String, Map<String, List<String>>>>() {}
+                );
 
                 log.info("✅ Successfully parsed meal plan for {}", user.getEmail());
                 log.info("📋 Available keys in meal plan: {}", structuredMealPlan.keySet());
 
                 // Get today's meal plan
                 Map<String, List<String>> todaysPlan = structuredMealPlan.get(today);
-
                 if (todaysPlan == null || todaysPlan.isEmpty()) {
                     log.warn("⚠️ No meal plan found for {} on {}!", user.getEmail(), today);
                     continue;
                 }
 
-                // Compose email content
+                // Compose email content (this method remains unchanged)
                 String emailContent = composeEmailContent(todaysPlan);
 
-                // Send email
                 try {
                     mailService.sendAlertEmail(user.getEmail(), "Today's Meal Plan", emailContent);
                     log.info("📩 Meal plan email sent successfully to {}", user.getEmail());
@@ -91,6 +95,7 @@ public class DailyMealPlanEmailService {
             }
         }
     }
+
 
 
     /**

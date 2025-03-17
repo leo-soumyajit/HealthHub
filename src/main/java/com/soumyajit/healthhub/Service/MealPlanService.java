@@ -32,19 +32,27 @@ public class MealPlanService {
      * and saves the meal plan as a JSON string for the given user.
      * The meal plan is saved with the active flag set to false.
      */
-    public Map<String, Map<String, List<String>>> generateStructuredMealPlan(Long userId,
-                                                                             String dietaryRestriction, String ingredients, String healthGoal) {
-        // Get the AI response based on dietary restrictions, ingredients, and the health goal.
+    public Map<String, Map<String, List<String>>> generateStructuredMealPlan(
+            Long userId, String dietaryRestriction, String ingredients, String healthGoal) {
+
+        // Call the AI integration service, passing the health goal along with other parameters.
         String aiResponse = aiIntegrationService.getMealPlanSuggestion(dietaryRestriction, ingredients, healthGoal);
         Map<String, Map<String, List<String>>> structuredMealPlan = parseMealPlan(aiResponse);
 
         try {
-            // Convert the structured plan to a JSON string.
-            String mealPlanJson = objectMapper.writeValueAsString(structuredMealPlan);
-            // Retrieve the User entity from the database.
+            // Create a composite map that includes both the health goal and the structured meal plan.
+            Map<String, Object> composite = new HashMap<>();
+            composite.put("healthGoal", healthGoal);
+            composite.put("mealPlan", structuredMealPlan);
+
+            // Convert the composite map to JSON for storage.
+            String mealPlanJson = objectMapper.writeValueAsString(composite);
+
+            // Retrieve the user from the database.
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new ResourceNotFound("User not found"));
-            // Create a new meal plan entry (saved as inactive by default).
+
+            // Save the meal plan (with the embedded healthGoal) in the database.
             UserMealPlan userMealPlan = new UserMealPlan(user, LocalDate.now(), mealPlanJson, false);
             userMealPlanRepository.save(userMealPlan);
         } catch (JsonProcessingException e) {
@@ -52,6 +60,8 @@ public class MealPlanService {
         }
         return structuredMealPlan;
     }
+
+
 
 
     /**
@@ -121,24 +131,21 @@ public class MealPlanService {
 
 
     public List<UserMealPlanDTO> getMealPlanDTOsForAuthenticatedUser() {
-        // Retrieve the authenticated user from the security context.
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<UserMealPlan> mealPlans = userMealPlanRepository.findByUser(user);
         return mealPlans.stream().map(plan -> {
-            Map<String, Map<String, List<String>>> structuredPlan = null;
+            Map<String, Object> composite;
             try {
-                structuredPlan = objectMapper.readValue(plan.getMealPlanContent(),
-                        new TypeReference<Map<String, Map<String, List<String>>>>() {});
+                composite = objectMapper.readValue(plan.getMealPlanContent(), new TypeReference<Map<String, Object>>() {});
             } catch (Exception e) {
                 e.printStackTrace();
-                structuredPlan = null; // or an empty map if preferred
+                composite = new HashMap<>();
             }
-            return new UserMealPlanDTO(
-                    plan.getId(),
-                    plan.getPlanDate(),
-                    structuredPlan,
-                    plan.isActive()
-            );
+            String healthGoal = composite.containsKey("healthGoal") ? composite.get("healthGoal").toString() : "";
+            Map<String, Map<String, List<String>>> structuredPlan = composite.containsKey("mealPlan")
+                    ? (Map<String, Map<String, List<String>>>) composite.get("mealPlan")
+                    : Map.of();
+            return new UserMealPlanDTO(plan.getId(), plan.getPlanDate(), structuredPlan, plan.isActive(), healthGoal);
         }).collect(Collectors.toList());
     }
 
@@ -179,8 +186,19 @@ public class MealPlanService {
      * Expected format: Day headers (e.g., "**Monday**") and meal type headers (e.g., "* Breakfast: ..."),
      * with additional detail lines starting with "+".
      */
-    private Map<String, Map<String, List<String>>> parseMealPlan(String aiResponse) {
-        // Define expected days and meal types.
+    public Map<String, Map<String, List<String>>> parseMealPlan(String aiResponse) {
+        // Attempt to parse as composite JSON first (i.e. {"healthGoal": "...", "mealPlan": { ... }})
+        try {
+            Map<String, Object> composite = objectMapper.readValue(aiResponse, new TypeReference<Map<String, Object>>() {});
+            if (composite.containsKey("mealPlan")) {
+                return objectMapper.convertValue(composite.get("mealPlan"),
+                        new TypeReference<Map<String, Map<String, List<String>>>>() {});
+            }
+        } catch (Exception ex) {
+            // Not a composite JSON or parsing failed, so fall back to line-based parsing.
+        }
+
+        // Default: use line-based parsing
         List<String> expectedDays = Arrays.asList("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday");
         Set<String> expectedMealTypes = new HashSet<>(Arrays.asList("Breakfast", "Snack", "Lunch", "Dinner"));
 
@@ -209,10 +227,8 @@ public class MealPlanService {
 
             // If the line starts with "*" then it's a meal type header.
             if (line.startsWith("*")) {
-                // Remove the leading "*" and split by ":" to see if inline detail exists.
                 String mealLine = line.substring(1).trim();
                 String[] parts = mealLine.split(":", 2);
-                // Clean meal type key by removing extra asterisks.
                 currentMealType = parts[0].replace("*", "").trim();
                 // Default to first expected day if currentDay is not set.
                 if (currentDay == null || !mealPlan.containsKey(currentDay)) {
@@ -243,11 +259,11 @@ public class MealPlanService {
             }
         }
 
-        // Post-process each day to merge keys not in expectedMealTypes into "Tips"
+        // Post-process: merge any keys not in expectedMealTypes into a "Tips" key.
         for (String day : mealPlan.keySet()) {
             Map<String, List<String>> dayMeals = mealPlan.get(day);
             List<String> tips = new ArrayList<>();
-            // If there is already a "Tips" key, add its content (after cleaning).
+            // If there is already a "Tips" key, move its content into tips.
             if (dayMeals.containsKey("Tips")) {
                 for (String tip : dayMeals.get("Tips")) {
                     if (!tip.trim().equals("**") && !tip.trim().isEmpty()) {
@@ -256,14 +272,12 @@ public class MealPlanService {
                 }
                 dayMeals.remove("Tips");
             }
-            // For any key that is not an expected meal type, consider it as a tip.
+            // For any key that is not an expected meal type, add the key and its details as tips.
             for (String key : new ArrayList<>(dayMeals.keySet())) {
                 if (!expectedMealTypes.contains(key)) {
-                    // Add the key itself if it's meaningful.
                     if (!key.trim().isEmpty()) {
                         tips.add(key);
                     }
-                    // Add any details under that key.
                     List<String> details = dayMeals.get(key);
                     if (details != null) {
                         for (String detail : details) {
