@@ -35,7 +35,7 @@ public class HealthService {
     }
 
     // Scheduled task: runs every minute to analyze stored health data and send alerts.
-    @Scheduled(fixedRate = 60000) // every 60 seconds
+    //@Scheduled(fixedRate = 60000) // every 60 seconds
     public void analyzeHealthData() {
         List<HealthData> dataList = healthDataRepository.findAll();
         for (HealthData data : dataList) {

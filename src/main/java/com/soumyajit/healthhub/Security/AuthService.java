@@ -14,6 +14,7 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -41,6 +42,7 @@ public class AuthService {
 
     //signup function with otp validation
 
+    @CachePut(cacheNames = "users",key = "#result.id")
     public UserDTOS signUp(SignUpRequestDTOS signUpRequestDTOS){  // signUp method for user
         Optional<User> user = userRepository.findByEmail(signUpRequestDTOS.getEmail());
         if (user.isPresent()) {

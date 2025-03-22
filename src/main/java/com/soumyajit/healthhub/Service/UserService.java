@@ -14,4 +14,6 @@ public interface UserService {
     void updateUserName(UserDTO userDTO);
 
     void updateProfileImage(MultipartFile multipartFile);
+
+    UserDTO getCurrentUser();
 }

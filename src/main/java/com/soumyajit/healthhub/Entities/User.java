@@ -43,6 +43,8 @@ public class User implements UserDetails {
 
     private String profileImage;
 
+    private String address;
+
 
 
     @Override

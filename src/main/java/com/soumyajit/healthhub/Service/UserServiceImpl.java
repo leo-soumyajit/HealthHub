@@ -7,6 +7,10 @@ import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Exception.ResourceNotFound;
 import com.soumyajit.healthhub.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -28,6 +33,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final Cloudinary cloudinary;
+    private final ModelMapper modelMapper;
 
     @Override
     public User getUserById(Long id) {
@@ -42,12 +48,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    @Cacheable(cacheNames = "users", key = "T(java.util.Objects).hash(T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getPrincipal().id)")
     public void updateUserName(UserDTO userDTO) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findById(user.getId()).
                 orElseThrow(() -> new ResourceNotFound("User with this id not found"));
         //if (user.getId().equals(u))
         user.setName(userDTO.getName());
+        user.setAddress(userDTO.getAddress());
         userRepository.save(user);
     }
 
@@ -73,6 +81,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new RuntimeException("Failed to upload profile picture", e);
         }
     }
+
+
+
+
+
+
+
+    @Override
+    @Cacheable(cacheNames = "users", key = "T(com.soumyajit.healthhub.Utils.SecurityUtil).getCurrentUserId()")
+    //@Cacheable(cacheNames = "users", key = "#user.id")
+    public UserDTO getCurrentUser() {
+        log.info("Fetching current user from DB");
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        log.info("Fetched user with id {}", user.getId());
+        return modelMapper.map(user, UserDTO.class);
+    }
+
+
+
+
+
+
 
 
 

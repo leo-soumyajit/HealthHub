@@ -18,11 +18,16 @@ public class UserController {
 
     private final UserService userService;
 
-    @PutMapping("/change-name")
+    @PutMapping("/change-details")
     public ResponseEntity<ApiResponse<String>> changeUserName(@RequestBody UserDTO userDTO) {
         userService.updateUserName(userDTO);
-        ApiResponse<String> response = new ApiResponse<>("Name updated successfully");
+        ApiResponse<String> response = new ApiResponse<>("Details updated successfully");
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping()
+    public ResponseEntity<UserDTO> getCurrentUser(){
+        return ResponseEntity.ok(userService.getCurrentUser());
     }
 
 
