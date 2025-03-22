@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 public class LoginDTOS {
 
+    private Long id;
     @Email
     private String email;
     private String password;

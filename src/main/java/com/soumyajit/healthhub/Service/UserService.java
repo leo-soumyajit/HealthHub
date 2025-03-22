@@ -1,6 +1,6 @@
 package com.soumyajit.healthhub.Service;
 
-import com.soumyajit.healthhub.DTOS.UserDTO;
+import com.soumyajit.healthhub.DTOS.UserDetailsDTO;
 import com.soumyajit.healthhub.Entities.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -11,9 +11,9 @@ public interface UserService {
     List<User> getAllUsers();
 
 
-    void updateUserName(UserDTO userDTO);
+    void updateUserName(UserDetailsDTO userDTO);
 
     void updateProfileImage(MultipartFile multipartFile);
 
-    UserDTO getCurrentUser();
+    UserDetailsDTO getCurrentUser();
 }

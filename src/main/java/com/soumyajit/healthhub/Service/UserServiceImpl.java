@@ -2,14 +2,13 @@ package com.soumyajit.healthhub.Service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.soumyajit.healthhub.DTOS.UserDTO;
+import com.soumyajit.healthhub.DTOS.UserDetailsDTO;
 import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Exception.ResourceNotFound;
 import com.soumyajit.healthhub.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,7 +16,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -49,7 +47,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Cacheable(cacheNames = "users", key = "T(java.util.Objects).hash(T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getPrincipal().id)")
-    public void updateUserName(UserDTO userDTO) {
+    public void updateUserName(UserDetailsDTO userDTO) {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findById(user.getId()).
                 orElseThrow(() -> new ResourceNotFound("User with this id not found"));
@@ -90,12 +88,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Cacheable(cacheNames = "users", key = "T(com.soumyajit.healthhub.Utils.SecurityUtil).getCurrentUserId()")
-    //@Cacheable(cacheNames = "users", key = "#user.id")
-    public UserDTO getCurrentUser() {
+    public UserDetailsDTO getCurrentUser() {
         log.info("Fetching current user from DB");
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         log.info("Fetched user with id {}", user.getId());
-        return modelMapper.map(user, UserDTO.class);
+        return modelMapper.map(user, UserDetailsDTO.class);
     }
 
 

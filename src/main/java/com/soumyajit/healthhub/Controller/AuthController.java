@@ -1,9 +1,6 @@
 package com.soumyajit.healthhub.Controller;
 
-import com.soumyajit.healthhub.DTOS.LoginDTOS;
-import com.soumyajit.healthhub.DTOS.LoginResponseDTO;
-import com.soumyajit.healthhub.DTOS.SignUpRequestDTOS;
-import com.soumyajit.healthhub.DTOS.UserDTOS;
+import com.soumyajit.healthhub.DTOS.*;
 import com.soumyajit.healthhub.Security.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -32,7 +29,7 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDTOS> signUp(@Valid @RequestBody SignUpRequestDTOS signUpRequestDTOS){
+    public ResponseEntity<UserDetailsDTO> signUp(@Valid @RequestBody SignUpRequestDTOS signUpRequestDTOS){
         return new ResponseEntity<>(authService.signUp(signUpRequestDTOS), HttpStatus.CREATED);
     }
 
@@ -52,17 +49,17 @@ public class AuthController {
     }
 
 
-    @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDTO> refreshToken(HttpServletRequest request){
-        String refreshToken = Arrays.stream(request.getCookies())
-                .filter(cookie -> "refreshToken".equals(cookie.getName()))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElseThrow(()->new AuthenticationServiceException("refreshToken Not Found inside the Cookies"));
-
-        String newAccessToken =  authService.refreshToken(refreshToken);
-        return ResponseEntity.ok(new LoginResponseDTO(newAccessToken));
-    }
+//    @PostMapping("/refresh")
+//    public ResponseEntity<LoginResponseDTO> refreshToken(HttpServletRequest request){
+//        String refreshToken = Arrays.stream(request.getCookies())
+//                .filter(cookie -> "refreshToken".equals(cookie.getName()))
+//                .findFirst()
+//                .map(Cookie::getValue)
+//                .orElseThrow(()->new AuthenticationServiceException("refreshToken Not Found inside the Cookies"));
+//
+//        String newAccessToken =  authService.refreshToken(refreshToken);
+//        return ResponseEntity.ok(new LoginResponseDTO(newAccessToken));
+//    }
 
 
 

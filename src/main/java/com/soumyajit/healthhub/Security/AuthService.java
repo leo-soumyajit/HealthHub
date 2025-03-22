@@ -1,9 +1,6 @@
 package com.soumyajit.healthhub.Security;
 
-import com.soumyajit.healthhub.DTOS.LoginDTOS;
-import com.soumyajit.healthhub.DTOS.LoginResponseDTO;
-import com.soumyajit.healthhub.DTOS.SignUpRequestDTOS;
-import com.soumyajit.healthhub.DTOS.UserDTOS;
+import com.soumyajit.healthhub.DTOS.*;
 import com.soumyajit.healthhub.Entities.Enums.Roles;
 import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Exception.ResourceNotFound;
@@ -15,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -43,7 +41,7 @@ public class AuthService {
     //signup function with otp validation
 
     @CachePut(cacheNames = "users",key = "#result.id")
-    public UserDTOS signUp(SignUpRequestDTOS signUpRequestDTOS){  // signUp method for user
+    public UserDetailsDTO signUp(SignUpRequestDTOS signUpRequestDTOS){  // signUp method for user
         Optional<User> user = userRepository.findByEmail(signUpRequestDTOS.getEmail());
         if (user.isPresent()) {
             throw new BadCredentialsException("User with this Email is already present");
@@ -63,7 +61,7 @@ public class AuthService {
         otpService.clearOTPVerified(signUpRequestDTOS.getEmail());
 
         sendWelcomeEmail(signUpRequestDTOS);
-        return modelMapper.map(savedUser, UserDTOS.class);
+        return modelMapper.map(savedUser, UserDetailsDTO.class);
 
     }
 
@@ -80,14 +78,13 @@ public class AuthService {
         return new LoginResponseDTO(userEntities.getId(),accessToken,refreshToken);
 
     }
+
     public String refreshToken(String refreshToken) { //refreshToken method
         Long uerId = jwtService.getUserIdFromToken(refreshToken);  //refresh token is valid
         User user = userRepository.findById(uerId)
                 .orElseThrow(()->
                         new ResourceNotFound("User not found with id : "+uerId));
         return jwtService.generateAccessToken(user);
-
-
     }
 
     private void sendWelcomeEmail(SignUpRequestDTOS signUpRequestDTOS) {

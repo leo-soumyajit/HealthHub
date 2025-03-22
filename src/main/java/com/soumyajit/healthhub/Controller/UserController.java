@@ -2,9 +2,8 @@ package com.soumyajit.healthhub.Controller;
 
 
 import com.soumyajit.healthhub.Advices.ApiResponse;
-import com.soumyajit.healthhub.DTOS.UserDTO;
+import com.soumyajit.healthhub.DTOS.UserDetailsDTO;
 import com.soumyajit.healthhub.Service.UserService;
-import com.soumyajit.healthhub.Service.UserServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +18,14 @@ public class UserController {
     private final UserService userService;
 
     @PutMapping("/change-details")
-    public ResponseEntity<ApiResponse<String>> changeUserName(@RequestBody UserDTO userDTO) {
+    public ResponseEntity<ApiResponse<String>> changeUserName(@RequestBody UserDetailsDTO userDTO) {
         userService.updateUserName(userDTO);
         ApiResponse<String> response = new ApiResponse<>("Details updated successfully");
         return ResponseEntity.ok(response);
     }
 
     @GetMapping()
-    public ResponseEntity<UserDTO> getCurrentUser(){
+    public ResponseEntity<UserDetailsDTO> getCurrentUser(){
         return ResponseEntity.ok(userService.getCurrentUser());
     }
 
