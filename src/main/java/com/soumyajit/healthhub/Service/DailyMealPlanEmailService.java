@@ -31,7 +31,7 @@ public class DailyMealPlanEmailService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Runs daily at 7 AM
-    @Scheduled(cron = "0 45 20 * * ?") // Runs at 02:06 AM Server Time
+    @Scheduled(cron = "0 07 01 * * ?") // Runs at 02:06 AM Server Time
     public void sendDailyMealPlanEmails() {
         log.info("🔄 Executing Meal Plan Email Scheduler at {}", LocalDateTime.now());
 
@@ -111,17 +111,19 @@ public class DailyMealPlanEmailService {
                 .append("<meta name='viewport' content='width=device-width, initial-scale=1.0'>")
                 .append("<title>Today's Meal Plan</title>")
                 .append("<style>")
-                .append("body { font-family: 'Arial', sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }")
-                .append(".container { max-width: 600px; margin: 20px auto; background: #ffffff; padding: 20px; ")
-                .append("border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }")
-                .append(".header { background: #007bff; color: #fff; padding: 15px; text-align: center; border-radius: 10px 10px 0 0; }")
-                .append(".header h1 { margin: 0; font-size: 24px; }")
+                .append("body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background-color: #f4f4f4; ")
+                .append("background-image: url('https://res.cloudinary.com/dho5umnhe/image/upload/v1744226503/food-removebg-preview_eflja9.png'); background-size: cover; background-repeat: no-repeat; background-position: center; }")
+                .append(".container { max-width: 600px; margin: 40px auto; background: rgba(255, 255, 255, 0.95); padding: 20px; ")
+                .append("border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.15); }")
+                .append(".header { background: #007bff; color: #fff; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }")
+                .append(".header h1 { margin: 0; font-size: 26px; }")
                 .append(".meal-section { padding: 15px; border-bottom: 1px solid #ddd; }")
                 .append(".meal-section:last-child { border-bottom: none; }")
                 .append(".meal-section h2 { color: #007bff; font-size: 20px; margin-bottom: 10px; }")
                 .append("ul { list-style-type: none; padding: 0; }")
                 .append("li { background: #f8f9fa; padding: 10px; margin-bottom: 5px; border-radius: 5px; }")
-                .append(".footer { text-align: center; padding: 15px; font-size: 14px; color: #666; }")
+                .append(".footer { text-align: center; padding: 20px; font-size: 14px; color: #666; }")
+                .append(".social-icons img { width: 24px; margin: 0 8px; }")
                 .append("</style>")
                 .append("</head>")
                 .append("<body>")
@@ -139,13 +141,18 @@ public class DailyMealPlanEmailService {
 
         builder.append("<div class='footer'>")
                 .append("Enjoy your meals! Stay healthy & happy! 😊<br>")
-                .append("<strong>HealthHub Team</strong> <br>")
-                .append("<br>")
+                .append("<strong>HealthHub Team</strong><br><br>")
+                .append("<div class='social-icons'>")
+                .append("<a href='https://www.facebook.com/yourpage'><img src='https://cdn-icons-png.flaticon.com/512/733/733547.png' alt='Facebook'></a>")
+                .append("<a href='https://www.instagram.com/yourpage'><img src='https://cdn-icons-png.flaticon.com/512/2111/2111463.png' alt='Instagram'></a>")
+                .append("<a href='https://www.linkedin.com/company/yourpage'><img src='https://cdn-icons-png.flaticon.com/512/145/145807.png' alt='LinkedIn'></a>")
+                .append("</div><br>")
                 .append("<span style='font-size:12px; color:#999;'>HealthHub | Haldia, West Bengal | Contact Support</span>")
                 .append("</div>")
                 .append("</div></body></html>");
 
         return builder.toString();
     }
+
 
 }

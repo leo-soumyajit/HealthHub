@@ -93,43 +93,53 @@ public class AuthService {
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
             helper.setTo(signUpRequestDTOS.getEmail());
-            helper.setSubject("Welcome to Our Website");
+            helper.setSubject("Welcome to HealthHub!");
 
             String htmlMsg = "<!DOCTYPE html>"
                     + "<html lang=\"en\">"
                     + "<head>"
                     + "<meta charset=\"UTF-8\">"
                     + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">"
-                    + "<title>Welcome to Our HealthHub </title>"
+                    + "<title>Welcome to HealthHub</title>"
                     + "<style>"
-                    + "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; color: #333; }"
-                    + ".email-container { width: 100%; max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }"
-                    + ".header { background-color: #00bcd4; color: #ffffff; padding: 10px 0; text-align: center; border-radius: 10px 10px 0 0; }"
-                    + ".header h1 { margin: 0; font-size: 24px; }"
-                    + ".content { padding: 20px; }"
-                    + ".content p { margin: 10px 0; }"
+                    + "body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0; }"
+                    + ".email-container { max-width: 600px; margin: 40px auto; background: #ffffff; padding: 20px;"
+                    + "border-radius: 10px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }"
+                    + ".header { background-color: #00bcd4; color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }"
+                    + ".header h1 { margin: 0; font-size: 26px; }"
+                    + ".content { padding: 20px; font-size: 16px; }"
                     + ".footer { text-align: center; font-size: 12px; color: #777; margin-top: 20px; }"
+                    + ".social-icons { margin-top: 15px; }"
+                    + ".social-icons img { width: 24px; margin: 0 8px; vertical-align: middle; }"
                     + "</style>"
                     + "</head>"
                     + "<body>"
                     + "<div class=\"email-container\">"
                     + "<div class=\"header\"><h1>Welcome, " + signUpRequestDTOS.getName() + "!</h1></div>"
                     + "<div class=\"content\">"
-                    + "<p>We are thrilled to have you join our community at <strong>HealthHub</strong>!</p>"
-                    + "<p>Get ready to explore and engage with our platform, designed to foster creativity and learning.</p>"
-                    + "<p>Thank you for being a part of our journey.</p>"
+                    + "<p>We're excited to welcome you to <strong>HealthHub</strong>! 🎉</p>"
+                    + "<p>Start exploring personalized health features made just for you.</p>"
+                    + "<p>Need any help? We’re here to support you anytime!</p>"
                     + "</div>"
-                    + "<div class=\"footer\"><p>HealthHub | Haldia , India | Contact Support</p><p>If you didn’t sign up, please ignore this email.</p></div>"
+                    + "<div class=\"footer\">"
+                    + "<hr style=\"border: none; border-top: 1px solid #e0e0e0; margin: 20px 0;\">"
+                    + "<div class='social-icons'>"
+                    + "<a href='https://www.facebook.com/yourpage'><img src='https://cdn-icons-png.flaticon.com/512/733/733547.png' alt='Facebook'></a>"
+                    + "<a href='https://www.instagram.com/yourpage'><img src='https://cdn-icons-png.flaticon.com/512/2111/2111463.png' alt='Instagram'></a>"
+                    + "<a href='https://www.linkedin.com/company/yourpage'><img src='https://cdn-icons-png.flaticon.com/512/145/145807.png' alt='LinkedIn'></a>"
+                    + "</div><br>"
+                    + "HealthHub | Haldia, India | Contact Support<br>"
+                    + "<em>If you didn’t sign up, please ignore this email.</em>"
+                    + "</div>"
                     + "</div>"
                     + "</body>"
                     + "</html>";
 
-            helper.setText(htmlMsg, true);  // Set to true to indicate that the message is HTML
-
+            helper.setText(htmlMsg, true);
             mailSender.send(message);
-            System.out.println("Welcome email sent successfully to " + signUpRequestDTOS.getEmail());
+            System.out.println("✅ Welcome email sent successfully to " + signUpRequestDTOS.getEmail());
         } catch (MessagingException e) {
-            System.err.println("Failed to send welcome email: " + e.getMessage());
+            System.err.println("❌ Failed to send welcome email: " + e.getMessage());
             e.printStackTrace();
         }
     }
