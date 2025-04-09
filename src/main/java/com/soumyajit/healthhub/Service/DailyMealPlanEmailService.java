@@ -31,7 +31,7 @@ public class DailyMealPlanEmailService {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     // Runs daily at 7 AM
-    @Scheduled(cron = "0 07 01 * * ?") // Runs at 02:06 AM Server Time
+    @Scheduled(cron = "0 44 3 * * ?") // Runs at 02:06 AM Server Time
     public void sendDailyMealPlanEmails() {
         log.info("🔄 Executing Meal Plan Email Scheduler at {}", LocalDateTime.now());
 

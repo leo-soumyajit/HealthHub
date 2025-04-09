@@ -591,3 +591,76 @@ footer {
   filter: grayscale(0%);
   transform: scale(1.1);
 }
+
+.features-section {
+  max-width: 1200px;
+  margin: 80px auto;
+  padding: 0 20px;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 2.5rem;
+  margin-bottom: 60px;
+  color: #0a2540;
+}
+
+.feature-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 50px;
+  margin-bottom: 80px;
+  flex-wrap: wrap;
+}
+
+/* FLIP layout only for feature-reverse */
+.feature-block.feature-reverse {
+  flex-direction: row-reverse;
+}
+
+.feature-text {
+  flex: 1;
+  min-width: 300px;
+}
+
+.feature-text h3 {
+  font-size: 1.8rem;
+  color: #007acc;
+  margin-bottom: 15px;
+}
+
+.feature-text p {
+  font-size: 1.05rem;
+  color: #444;
+  line-height: 1.7;
+}
+
+.feature-image {
+  flex: 1;
+  min-width: 280px;
+  text-align: center;
+}
+
+.feature-image img {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive stacking for mobile */
+@media screen and (max-width: 768px) {
+  .feature-block,
+  .feature-block.feature-reverse {
+    flex-direction: column;
+  }
+
+  .feature-image img {
+    max-width: 100%;
+  }
+
+  .section-title {
+    font-size: 2rem;
+  }
+}
