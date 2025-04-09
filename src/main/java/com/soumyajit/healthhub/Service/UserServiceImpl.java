@@ -82,10 +82,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 
 
-
-
-
-
     @Override
     @Cacheable(cacheNames = "users", key = "T(com.soumyajit.healthhub.Utils.SecurityUtil).getCurrentUserId()")
     public UserDetailsDTO getCurrentUser() {
@@ -94,13 +90,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         log.info("Fetched user with id {}", user.getId());
         return modelMapper.map(user, UserDetailsDTO.class);
     }
-
-
-
-
-
-
-
 
 
     @Override

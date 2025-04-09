@@ -15,4 +15,6 @@ public interface UserMealPlanRepository extends JpaRepository<UserMealPlan, Long
     Optional<UserMealPlan> findByUserIdAndActiveTrue(Long userId);
 
     List<UserMealPlan> findByUser(User user);
+
+    List<UserMealPlan> findAllByUserIdAndActiveTrue(Long userId);
 }

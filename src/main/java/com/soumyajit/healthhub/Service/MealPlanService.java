@@ -2,6 +2,7 @@ package com.soumyajit.healthhub.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.soumyajit.healthhub.DTOS.TodaysMealPlanDTO;
 import com.soumyajit.healthhub.DTOS.UserMealPlanDTO;
 import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Entities.UserMealPlan;
@@ -14,6 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -276,7 +279,41 @@ public class MealPlanService {
     }
 
 
+    public List<Map<String, List<String>>> getTodaysMealPlansForUser(Long userId) {
+        List<UserMealPlan> activePlans = userMealPlanRepository.findAllByUserIdAndActiveTrue(userId);
 
+        if (activePlans.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        String today = LocalDate.now(ZoneId.systemDefault())
+                .getDayOfWeek()
+                .getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+
+        List<Map<String, List<String>>> todaysPlans = new ArrayList<>();
+
+        for (UserMealPlan plan : activePlans) {
+            try {
+                Map<String, Object> composite = objectMapper.readValue(
+                        plan.getMealPlanContent(), new TypeReference<>() {}
+                );
+
+                Map<String, Map<String, List<String>>> structuredMealPlan = objectMapper.convertValue(
+                        composite.get("mealPlan"), new TypeReference<>() {}
+                );
+
+                Map<String, List<String>> todaysPlan = structuredMealPlan.get(today);
+                if (todaysPlan != null && !todaysPlan.isEmpty()) {
+                    todaysPlans.add(todaysPlan);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return todaysPlans;
+    }
 
 
 }

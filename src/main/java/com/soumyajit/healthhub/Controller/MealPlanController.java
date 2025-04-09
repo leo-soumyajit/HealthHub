@@ -1,20 +1,26 @@
 // File: src/main/java/com/soumyajit/healthhub/Controller/MealPlanController.java
 package com.soumyajit.healthhub.Controller;
 
+import com.soumyajit.healthhub.Advices.ApiError;
 import com.soumyajit.healthhub.Advices.ApiResponse;
 import com.soumyajit.healthhub.DTOS.MealPlanResponse;
 import com.soumyajit.healthhub.DTOS.MealPlanUpdateRequest;
+import com.soumyajit.healthhub.DTOS.TodaysMealPlanDTO;
 import com.soumyajit.healthhub.DTOS.UserMealPlanDTO;
 import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Entities.UserMealPlan;
 import com.soumyajit.healthhub.Service.MealPlanService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.TextStyle;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.List;
 
@@ -110,6 +116,28 @@ public class MealPlanController {
         // Wrap the success message in ApiResponse and return
         ApiResponse<String> response = new ApiResponse<>("Meal plan deleted successfully");
         return ResponseEntity.ok(response);
+    }
+
+
+    @GetMapping("/show-Todays-MealPlan")
+    public ResponseEntity<ApiResponse<?>> showTodaysMealPlan() {
+        User userDetails = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Long userId = userDetails.getId();
+
+        List<Map<String, List<String>>> todaysMealPlans = mealPlanService.getTodaysMealPlansForUser(userId);
+
+        if (todaysMealPlans.isEmpty()) {
+            ApiError error = new ApiError(HttpStatus.NOT_FOUND, "No active meal plans found for today.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ApiResponse<>(error));
+        }
+
+        // Optionally wrap result with date
+        Map<String, Object> response = new HashMap<>();
+        response.put("date", LocalDate.now().toString());
+        response.put("day", LocalDate.now().getDayOfWeek().getDisplayName(TextStyle.FULL, Locale.ENGLISH));
+        response.put("mealPlans", todaysMealPlans);
+
+        return ResponseEntity.ok(new ApiResponse<>(response));
     }
 
 
