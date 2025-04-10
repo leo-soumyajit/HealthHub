@@ -8,3 +8,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
     item.classList.toggle('open');
   });
 });
+
+setInterval(() => {
+  window.location.reload();
+}, 60000); // 60000ms = 1 minute
