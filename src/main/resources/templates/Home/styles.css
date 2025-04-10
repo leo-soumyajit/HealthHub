@@ -160,6 +160,9 @@ footer {
     position: relative;
 }
 
+
+
+
 .feature-image {
     width: 100%;
     max-width: 500px;
@@ -607,7 +610,7 @@ footer {
 .section-title {
   text-align: center;
   font-size: 2.5rem;
-  margin-bottom: 60px;
+  margin-bottom: 80px;
   color: #0a2540;
 }
 
@@ -615,8 +618,8 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 50px;
-  margin-bottom: 80px;
+  gap: 100px;
+  margin-bottom: 120px;
   flex-wrap: wrap;
 }
 
@@ -669,4 +672,13 @@ footer {
   .section-title {
     font-size: 2rem;
   }
+}
+.feature-image video {
+    width: 100%;
+    max-width: 600px;
+    max-height: 800px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
 }
