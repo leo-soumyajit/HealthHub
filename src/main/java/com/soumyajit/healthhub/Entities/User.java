@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,7 +40,15 @@ public class User implements UserDetails {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private Set<Roles> roles;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Long> likedPostIds = new HashSet<>();
+
+
+    @OneToMany(mappedBy = "user_id", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Post> posts;
 
 
     private String profileImage;

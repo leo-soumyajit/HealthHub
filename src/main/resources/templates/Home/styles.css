@@ -327,7 +327,7 @@ footer {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(-66%);
+        transform: translateX(-100%);
     }
 }
 .testimonial-card {
