@@ -60,19 +60,7 @@ button {
     background: #e0f0ff;
 }
 
-/* Features Section */
-.features {
-    padding: 60px 20px;
-    text-align: center;
-}
 
-.feature-cards {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 30px;
-    margin-top: 40px;
-}
 
 .card {
     background: #ffffff;
@@ -171,6 +159,24 @@ footer {
     background: #f0f8ff;
     position: relative;
 }
+
+.feature-image {
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.feature-image img {
+    width: 100%;
+    height: auto;
+    max-height: 350px;
+    object-fit: cover;
+    border-radius: 12px;
+}
+
 
 .features h2 {
     font-size: 2.5rem;

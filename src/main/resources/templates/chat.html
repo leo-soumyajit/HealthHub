@@ -14,16 +14,31 @@
     <header>
         <h1>HealthGuru</h1>
         <p>The Smart Path to Wellness</p>
+        <!-- Dark Mode Toggle Button -->
+        <!-- Dark Mode Toggle Switch -->
+        <div class="toggle-wrapper">
+            <input type="checkbox" id="darkModeToggle" />
+            <label for="darkModeToggle" class="toggle-label">
+                <span class="toggle-icon sun">☀️</span>
+                <span class="toggle-icon moon">🌙</span>
+            </label>
+        </div>
+
     </header>
+
     <div id="chat-box" class="chat-box"></div>
+
     <div class="input-area">
         <input type="text" id="chatInput" placeholder="Type your message here..." />
         <button id="sendBtn" onclick="sendMessage()">Send</button>
     </div>
+
     <footer>
         <p>HealthGuru can make mistakes. Check important info.</p>
     </footer>
 </div>
+
 <script src="chat.js"></script>
+<script src="darkmode.js"></script> <!-- Add this for dark mode toggle -->
 </body>
 </html>
