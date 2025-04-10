@@ -944,3 +944,8 @@ footer {
     transform: translateX(100%) translateY(100%) rotate(25deg);
   }
 }
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 equal columns */
+  gap: 30px;
+}
