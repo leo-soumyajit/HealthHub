@@ -18,7 +18,7 @@ public class PostDto {
     private List<String> imgOrVdos;
     private String userName;
     private Long userId;
-    private Long likes;
+//    private Long likes;
 ////    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", shape = JsonFormat.Shape.STRING)
 //    private LocalDate createdAt;
 }
