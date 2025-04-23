@@ -2,13 +2,17 @@ package com.soumyajit.healthhub.Service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.soumyajit.healthhub.DTOS.ProfilePostDTOS;
 import com.soumyajit.healthhub.DTOS.UserDetailsDTO;
 import com.soumyajit.healthhub.Entities.User;
 import com.soumyajit.healthhub.Exception.ResourceNotFound;
 import com.soumyajit.healthhub.Repository.UserRepository;
+import com.soumyajit.healthhub.Utils.SecurityUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.modelmapper.TypeToken;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -83,12 +88,32 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
 
     @Override
+    @Transactional
     @Cacheable(cacheNames = "users", key = "T(com.soumyajit.healthhub.Utils.SecurityUtil).getCurrentUserId()")
     public UserDetailsDTO getCurrentUser() {
         log.info("Fetching current user from DB");
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Long currentUserId = SecurityUtil.getCurrentUserId(); // or get from context
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         log.info("Fetched user with id {}", user.getId());
-        return modelMapper.map(user, UserDetailsDTO.class);
+
+        UserDetailsDTO userDTO = modelMapper.map(user, UserDetailsDTO.class);
+
+        // Map posts manually
+        Type listType = new TypeToken<List<ProfilePostDTOS>>() {}.getType();
+        List<ProfilePostDTOS> postDTOs = modelMapper.map(user.getPosts(), listType);
+
+        // Add username and userId to each post
+        postDTOs.forEach(post -> {
+            post.setUserId(user.getId());
+            post.setUserName(user.getName());
+        });
+
+        userDTO.setPostsList(postDTOs);
+
+        return userDTO;
     }
 
 

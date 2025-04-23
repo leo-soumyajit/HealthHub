@@ -70,13 +70,10 @@ public class AuthService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginDTOS.getEmail(),loginDTOS.getPassword())
         );
-
         User userEntities = (User) authentication.getPrincipal();
         String accessToken = jwtService.generateAccessToken(userEntities);
         String refreshToken = jwtService.generateRefreshToken(userEntities);
-
-        return new LoginResponseDTO(userEntities.getId(),accessToken,refreshToken);
-
+        return new LoginResponseDTO(userEntities.getId(),accessToken,refreshToken,userEntities.getRoles());
     }
 
     public String refreshToken(String refreshToken) { //refreshToken method
