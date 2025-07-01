@@ -86,7 +86,7 @@ https://healthhub-7656.onrender.com/auth/signup
 ### 📦 Clone the Repository
 
 ```bash
-git https://github.com/leo-soumyajit/HealthHub.git
+git clone https://github.com/leo-soumyajit/HealthHub.git
 cd HealthHub
 ```
 🛠 Configure Database Connection
