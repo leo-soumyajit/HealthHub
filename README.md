@@ -35,6 +35,12 @@ Browse informative, **verified health content** written by real and **trusted do
 
 ---
 
+## 💬 Why HealthHub?
+
+HealthHub bridges the gap between technology and personal wellness. With meal personalization, progress tracking, and medically accurate articles — users stay healthy, informed, and in control.
+
+---
+
 ## 🛠️ Tech Stack
 
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
