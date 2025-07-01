@@ -83,10 +83,10 @@ https://healthhub-7656.onrender.com/auth/signup
 
 ## ⚠️ Note on AI Integration
 Generate Meal Plan Feature:
+
 This feature uses LLaMA 3.2 1B via Olama with:
 ```
 spring.ai.model=llama3.2:1b
-
 ```
 🧠 The model runs locally, and will not work out-of-the-box on a deployed server.
 
