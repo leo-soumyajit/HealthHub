@@ -2,25 +2,22 @@ package com.soumyajit.healthhub.Entities;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.soumyajit.healthhub.Entities.User;
 import jakarta.persistence.*;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
 @Setter
-@Data
 @Table(name = "posts_table")
 public class Post {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,22 +25,21 @@ public class Post {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false,columnDefinition = "LONGTEXT")
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
     @ElementCollection
-    @OrderColumn(name = "imgOrVdos_order")
-    @Column(nullable = false)
+    @CollectionTable(name = "post_media", joinColumns = @JoinColumn(name = "post_id"))
+    @OrderColumn(name = "media_order")
+    @Column(name = "media", nullable = false)
     private List<String> imgOrVdos;
 
     private Long likes;
 
-
     @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
-    private User user_id;
-
+    private User user;
 
     @CreationTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -52,10 +48,4 @@ public class Post {
     @UpdateTimestamp
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
-
-
-
-
-
-
 }

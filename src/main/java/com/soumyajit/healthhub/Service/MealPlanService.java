@@ -14,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.TextStyle;
@@ -133,6 +135,7 @@ public class MealPlanService {
 
 
 
+    @Transactional(readOnly = true)
     public List<UserMealPlanDTO> getMealPlanDTOsForAuthenticatedUser() {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<UserMealPlan> mealPlans = userMealPlanRepository.findByUser(user);
@@ -279,6 +282,7 @@ public class MealPlanService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<Map<String, List<String>>> getTodaysMealPlansForUser(Long userId) {
         List<UserMealPlan> activePlans = userMealPlanRepository.findAllByUserIdAndActiveTrue(userId);
 

@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -30,32 +29,29 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String name;
 
-
     @Column(nullable = false, unique = true)
     private String email;
-
 
     @Column(nullable = false)
     private String password;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    @Column(length = 20)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "role", length = 20)
     private Set<Roles> roles;
 
     @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_liked_posts", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "post_id")
     private Set<Long> likedPostIds = new HashSet<>();
 
-
-    @OneToMany(mappedBy = "user_id", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts;
-
 
     private String profileImage;
 
     private String address;
-
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -63,7 +59,6 @@ public class User implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
                 .collect(Collectors.toSet());
     }
-
 
     @Override
     public String getUsername() {

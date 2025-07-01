@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
         post.setLikes(0L);
         post.setImgOrVdos(imageUrls);
         User user = getCurrentUserWithPosts();
-        post.setUser_id(user);
+        post.setUser(user);
         Post savedPost = postRepository.save(post);
         log.info("Saved post to the database");
 
@@ -159,7 +159,7 @@ public class PostServiceImpl implements PostService {
 
         User user = getCurrentUser();
 
-        if (!user.getId().equals(post.getUser_id().getId())) {
+        if (!user.getId().equals(post.getUser().getId())) {
             throw new UnAuthorizedException("Post does not belong to this user with id: " + user.getId());
         }
 
@@ -182,7 +182,7 @@ public class PostServiceImpl implements PostService {
 
         User user = getCurrentUser();
 
-        if (!user.getId().equals(post.getUser_id().getId())) {
+        if (!user.getId().equals(post.getUser().getId())) {
             throw new UnAuthorizedException("Post does not belong to this user with id: " + user.getId());
         }
 
