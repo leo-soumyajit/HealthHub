@@ -81,6 +81,21 @@ https://healthhub-7656.onrender.com/auth/signup
 
 ---
 
+## ⚠️ Note on AI Integration
+Generate Meal Plan Feature:
+This feature uses LLaMA 3.2 1B via Olama with:
+```
+spring.ai.model=llama3.2:1b
+
+```
+🧠 The model runs locally, and will not work out-of-the-box on a deployed server.
+
+✅ To use the meal plan generation, you must download and run the LLaMA 3.2 1B model on your local machine.
+
+🔗 Follow Olama’s documentation to install and run the model locally: https://github.com/ollama/ollama.
+
+---
+
 ## ⚙️ Setup & Run Locally
 
 ### 📦 Clone the Repository
