@@ -58,7 +58,7 @@ HealthHub bridges the gap between technology and personal wellness. With meal pe
 
 ---
 
-## 🐳 Docker
+## 🐳 Docker & 🔧 Deployment Instructions
 pull the public image from Docker Hub:
 ```bash
 docker pull soumyajit2005/healthhub
@@ -77,10 +77,7 @@ https://healthhub-7656.onrender.com/auth/signup
 
 🐦 Try Endpoints in Postman:
 🔗 with https://healthhub-7656.onrender.com/auth/signup
-🌐 Postman API workspace:
-```bash
-https://www.postman.com/newsly-0222/workspace/healthhub
-```
+> 🔗 View the full API reference in [Postman Collection](https://www.postman.com/newsly-0222/workspace/healthhub)
 
 ---
 
@@ -119,7 +116,5 @@ Once the server is running, open in browser:
 ```bash
 http://localhost:7000/swagger-ui/index.html
 ```
-> 🔗 View the full API reference in [Postman Collection](https://www.postman.com/newsly-0222/workspace/healthhub)
-
 ---
 
