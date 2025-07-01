@@ -32,7 +32,9 @@ public class Post {
     @CollectionTable(name = "post_media", joinColumns = @JoinColumn(name = "post_id"))
     @OrderColumn(name = "media_order")
     @Column(name = "media", nullable = false)
+    @org.hibernate.annotations.Cascade(org.hibernate.annotations.CascadeType.DELETE_ORPHAN)
     private List<String> imgOrVdos;
+
 
     private Long likes;
 

@@ -46,8 +46,9 @@ public class User implements UserDetails {
     @Column(name = "post_id")
     private Set<Long> likedPostIds = new HashSet<>();
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Post> posts;
+
 
     private String profileImage;
 

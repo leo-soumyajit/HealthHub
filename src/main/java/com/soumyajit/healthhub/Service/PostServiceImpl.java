@@ -172,11 +172,13 @@ public class PostServiceImpl implements PostService {
         return modelMapper.map(updatedPost, PostDto.class);
     }
 
+
     @Override
     @Transactional
     @CacheEvict(value = {"postById", "allPosts"}, allEntries = true)
     public void deletePostById(Long postId) {
         log.info("Deleting Post with id: {}", postId);
+
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new ResourceNotFound("Post not found with Id: " + postId));
 
@@ -186,8 +188,13 @@ public class PostServiceImpl implements PostService {
             throw new UnAuthorizedException("Post does not belong to this user with id: " + user.getId());
         }
 
-        postRepository.deleteById(postId);
+        postRepository.delete(post); // <-- ACTUAL delete
+        log.info("Post deleted successfully");
     }
+
+
+
+
 
     @Override
     public List<PostDto> searchPosts(String keyword) {
