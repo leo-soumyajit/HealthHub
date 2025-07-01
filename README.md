@@ -5,7 +5,7 @@
 
 ---
 
-![HealthHub Banner](https://i.imgur.com/klXo4Wa.png) <!-- Replace with your own banner image if needed -->
+<!-- ![HealthHub Banner](https://i.imgur.com/klXo4Wa.png)  Replace with your own banner image if needed -->
 
 ## 🚀 Overview
 
