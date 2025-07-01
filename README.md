@@ -73,7 +73,16 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/<your_db_name>
 spring.datasource.username=your_db_username
 spring.datasource.password=your_db_password
 ```
-
+🛠 Configure Redis Cache
+To enable Redis caching in your Spring Boot application, add the following to your application.properties:
+```bash
+# Redis Configuration
+spring.cache.type=redis
+spring.data.redis.host=<your host>
+spring.data.redis.port=<<your port>
+spring.data.redis.username=default
+spring.data.redis.password=<your password>
+```
 ▶ Run the Application
 ```bash
 ./mvnw spring-boot:run
