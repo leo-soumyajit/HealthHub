@@ -57,16 +57,15 @@ Browse informative, **verified health content** written by real and **trusted do
 ### 📦 Clone the Repository
 
 ```bash
-git clone https://github.com/leo-soumyajit/E-Grocery-Store.git
-cd E-Grocery-Store
+git https://github.com/leo-soumyajit/HealthHub.git
+cd HealthHub
 ```
 🛠 Configure Database Connection
 Edit the application.properties file:
 ```bash
-spring.datasource.url=jdbc:postgresql://localhost:5432/e_grocery
+spring.datasource.url=jdbc:postgresql://localhost:5432/<your_db_name>
 spring.datasource.username=your_db_username
 spring.datasource.password=your_db_password
-server.servlet.context-path=/api/v1
 ```
 
 ▶ Run the Application
