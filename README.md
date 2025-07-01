@@ -4,8 +4,15 @@
 > Your Personalized Health & Meal Plan Companion – Powered by Spring Boot & Smart APIs
 
 ---
-
 <!-- ![HealthHub Banner](https://i.imgur.com/klXo4Wa.png)  Replace with your own banner image if needed -->
+<div align="center">
+  <img src="https://forthebadge.com/images/badges/built-with-love.svg" />&nbsp;
+  <img src="https://forthebadge.com/images/badges/uses-brains.svg" />&nbsp;
+  <img src="https://forthebadge.com/images/badges/powered-by-responsibility.svg"/>
+</div>
+<br/>
+
+---
 
 ## 🚀 Overview
 
