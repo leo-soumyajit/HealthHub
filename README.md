@@ -58,6 +58,32 @@ HealthHub bridges the gap between technology and personal wellness. With meal pe
 
 ---
 
+## 🐳 Docker
+pull the public image from Docker Hub:
+```bash
+docker pull soumyajit2005/healthhub
+```
+```bash
+docker run -p 8080:8080 soumyajit2005/healthhub
+```
+
+🌐 Deployment
+This backend is hosted live on Render using Docker.
+
+📍 API Base URL:
+```bash
+https://healthhub-7656.onrender.com/auth/signup
+```
+
+🐦 Try Endpoints in Postman:
+🔗 with https://healthhub-7656.onrender.com/auth/signup
+🌐 Postman API workspace:
+```bash
+https://www.postman.com/newsly-0222/workspace/healthhub
+```
+
+---
+
 ## ⚙️ Setup & Run Locally
 
 ### 📦 Clone the Repository
