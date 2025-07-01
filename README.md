@@ -79,7 +79,7 @@ To enable Redis caching in your Spring Boot application, add the following to yo
 # Redis Configuration
 spring.cache.type=redis
 spring.data.redis.host=<your host>
-spring.data.redis.port=<<your port>
+spring.data.redis.port=<your port>
 spring.data.redis.username=default
 spring.data.redis.password=<your password>
 ```
