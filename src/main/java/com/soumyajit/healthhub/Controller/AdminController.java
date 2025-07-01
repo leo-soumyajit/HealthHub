@@ -5,10 +5,7 @@ import com.soumyajit.healthhub.Service.adminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/admin")
@@ -30,6 +27,12 @@ public class AdminController {
     public ResponseEntity<ApiResponse<String>> makeUserDoctor(@PathVariable Long userId) {
         adminService.makeUserDoctor(userId);
         return ResponseEntity.ok(new ApiResponse<>("User promoted to DOCTOR successfully 🚀"));
+    }
+
+    @GetMapping("/hi")
+    public ResponseEntity<ApiResponse<String>> sayHi(){
+        ApiResponse apiResponse = new ApiResponse("Hello from Server");
+        return ResponseEntity.ok(apiResponse);
     }
 
 
