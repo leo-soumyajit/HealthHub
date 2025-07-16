@@ -6,11 +6,16 @@
 ---
 <!-- ![HealthHub Banner](https://i.imgur.com/klXo4Wa.png)  Replace with your own banner image if needed -->
 <div align="center">
-  <img src="https://forthebadge.com/images/badges/built-with-love.svg" />&nbsp;
-  <img src="https://forthebadge.com/images/badges/uses-brains.svg" />&nbsp;
-  <img src="https://forthebadge.com/images/badges/powered-by-responsibility.svg"/>
+  <img src="https://img.shields.io/badge/Compiled%20with-Caffeine-6f4e37?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Runs%20on-Coffee%20%26%20Willpower-d2691e?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Made%20from-Scratch%20Memory-8a2be2?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Tested-in%20Production-ff4500?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/100%25-Ctrl%20%2B%20S%20Powered-228b22?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Debugged-Till%20Dawn-b22222?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Driven%20by-Deadlines-1e90ff?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Aim-Code%20%26%20Retry-f39c12?style=for-the-badge" />
 </div>
-<br/>
+
 
 ---
 
