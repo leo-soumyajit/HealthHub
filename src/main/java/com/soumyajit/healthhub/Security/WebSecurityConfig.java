@@ -78,7 +78,7 @@ public class WebSecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         // Set allowed origins; for development you may use "*" to allow all origins
-        config.setAllowedOrigins(Arrays.asList("http://localhost:63342"));
+        config.setAllowedOrigins(Arrays.asList("https://bfe92dd0-cf47-4edb-ada6-3d66578742ab.lovableproject.com"));
         // Allowed headers
         config.addAllowedHeader("*");
         // Allowed HTTP methods
